@@ -1,0 +1,110 @@
+[
+  {
+    "run_id": "jr_w256_ep200",
+    "feed": "",
+    "variant": "jumprelu",
+    "n_sae_features": 256,
+    "n_active": 256,
+    "n_gt_features": 27,
+    "coverage_0.95": 0.07407407407407407,
+    "coverage_0.90": 0.2962962962962963,
+    "mean_best_auc": 0.7163291573524475,
+    "monosemanticity": 0.18359375,
+    "n_top_matches": 2,
+    "per_tier": {
+      "categorical": {
+        "n_features": 21,
+        "coverage_0.95": 0.047619047619047616,
+        "coverage_0.90": 0.14285714285714285,
+        "mean_best_auc": 0.6528887152671814
+      },
+      "bucketed": {
+        "n_features": 0,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.0
+      },
+      "conjunctive": {
+        "n_features": 0,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.0
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.16666666666666666,
+        "coverage_0.90": 0.8333333333333334,
+        "mean_best_auc": 0.9383707046508789
+      }
+    },
+    "name": "jr_w256_ep200",
+    "n_features": 256,
+    "epochs": 200,
+    "recon_loss": 0.0001773195544956252,
+    "l0": 229.1192169189453,
+    "var_explained": 0.9998218788858264,
+    "wall_time_s": 59.227824687957764,
+    "regime_auc_per_feature": {
+      "phase:contraction": 0.9304037690162659,
+      "phase:expansion": 0.9335732460021973,
+      "phase:fiscal_active": 0.9494973421096802,
+      "phase:high_leverage": 0.988857626914978,
+      "phase:high_rate": 0.949796736240387,
+      "phase:monetary_active": 0.8780955076217651
+    }
+  },
+  {
+    "run_id": "jr_w512_ep300",
+    "feed": "",
+    "variant": "jumprelu",
+    "n_sae_features": 512,
+    "n_active": 512,
+    "n_gt_features": 27,
+    "coverage_0.95": 0.25925925925925924,
+    "coverage_0.90": 0.37037037037037035,
+    "mean_best_auc": 0.7321125864982605,
+    "monosemanticity": 0.076171875,
+    "n_top_matches": 7,
+    "per_tier": {
+      "categorical": {
+        "n_features": 21,
+        "coverage_0.95": 0.14285714285714285,
+        "coverage_0.90": 0.19047619047619047,
+        "mean_best_auc": 0.6664423942565918
+      },
+      "bucketed": {
+        "n_features": 0,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.0
+      },
+      "conjunctive": {
+        "n_features": 0,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.0
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.6666666666666666,
+        "coverage_0.90": 1.0,
+        "mean_best_auc": 0.9619587063789368
+      }
+    },
+    "name": "jr_w512_ep300",
+    "n_features": 512,
+    "epochs": 300,
+    "recon_loss": 0.0005830271984450519,
+    "l0": 211.23797607421875,
+    "var_explained": 0.9994143373359615,
+    "wall_time_s": 136.36506605148315,
+    "regime_auc_per_feature": {
+      "phase:contraction": 0.9794554710388184,
+      "phase:expansion": 0.9672998785972595,
+      "phase:fiscal_active": 0.9990363121032715,
+      "phase:high_leverage": 0.9083198308944702,
+      "phase:high_rate": 0.9995703101158142,
+      "phase:monetary_active": 0.918070375919342
+    }
+  }
+]

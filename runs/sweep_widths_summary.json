@@ -1,0 +1,278 @@
+[
+  {
+    "run_id": "jr_w256_ep200",
+    "feed": "acts",
+    "variant": "jumprelu",
+    "n_sae_features": 256,
+    "n_active": 256,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.3333333333333333,
+    "coverage_0.90": 0.35294117647058826,
+    "mean_best_auc": 0.7529138326644897,
+    "monosemanticity": 0.578125,
+    "n_top_matches": 17,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.3333333333333333,
+        "coverage_0.90": 0.3333333333333333,
+        "mean_best_auc": 0.7268240451812744
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.8986234068870544
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.5,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.8420391082763672
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.5945339798927307
+      }
+    },
+    "name": "jr_w256_ep200",
+    "n_features": 256,
+    "epochs": 200,
+    "recon_loss": 0.0003108819655608386,
+    "l0": 45.58403778076172,
+    "var_explained": 0.9991674870375065,
+    "wall_time_s": 82.16796898841858
+  },
+  {
+    "run_id": "jr_w1024_ep200",
+    "feed": "acts",
+    "variant": "jumprelu",
+    "n_sae_features": 1024,
+    "n_active": 1024,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.35294117647058826,
+    "coverage_0.90": 0.35294117647058826,
+    "mean_best_auc": 0.7469364404678345,
+    "monosemanticity": 0.2060546875,
+    "n_top_matches": 18,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.3333333333333333,
+        "coverage_0.90": 0.3333333333333333,
+        "mean_best_auc": 0.716532289981842
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.8979468941688538
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.625,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.843885064125061
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.593513548374176
+      }
+    },
+    "name": "jr_w1024_ep200",
+    "n_features": 1024,
+    "epochs": 200,
+    "recon_loss": 0.006155615672469139,
+    "l0": 119.95640563964844,
+    "var_explained": 0.9844912626047548,
+    "wall_time_s": 147.9295299053192
+  },
+  {
+    "run_id": "jr_w256_ep500",
+    "feed": "acts",
+    "variant": "jumprelu",
+    "n_sae_features": 256,
+    "n_active": 256,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.3333333333333333,
+    "coverage_0.90": 0.35294117647058826,
+    "mean_best_auc": 0.7518096566200256,
+    "monosemanticity": 0.4296875,
+    "n_top_matches": 17,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.3333333333333333,
+        "coverage_0.90": 0.3333333333333333,
+        "mean_best_auc": 0.726818859577179
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.8816347718238831
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.5,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.844089925289154
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.602261483669281
+      }
+    },
+    "name": "jr_w256_ep500",
+    "n_features": 256,
+    "epochs": 500,
+    "recon_loss": 0.00025101477513089776,
+    "l0": 29.085630416870117,
+    "var_explained": 0.9993278054555341,
+    "wall_time_s": 236.12870502471924
+  },
+  {
+    "run_id": "jr_w1024_ep500",
+    "feed": "acts",
+    "variant": "jumprelu",
+    "n_sae_features": 1024,
+    "n_active": 1024,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.27450980392156865,
+    "coverage_0.90": 0.3137254901960784,
+    "mean_best_auc": 0.7482266426086426,
+    "monosemanticity": 0.166015625,
+    "n_top_matches": 14,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.23333333333333334,
+        "coverage_0.90": 0.3,
+        "mean_best_auc": 0.7183568477630615
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.8801590800285339
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.5,
+        "coverage_0.90": 0.5,
+        "mean_best_auc": 0.8307940363883972
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.6335646510124207
+      }
+    },
+    "name": "jr_w1024_ep500",
+    "n_features": 1024,
+    "epochs": 500,
+    "recon_loss": 0.005035817623138428,
+    "l0": 96.25444030761719,
+    "var_explained": 0.9865514727723889,
+    "wall_time_s": 397.486163854599
+  },
+  {
+    "run_id": "topk_w1024_k20_ep200",
+    "feed": "acts",
+    "variant": "topk",
+    "n_sae_features": 1024,
+    "n_active": 1024,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.13725490196078433,
+    "coverage_0.90": 0.1568627450980392,
+    "mean_best_auc": 0.6845626831054688,
+    "monosemanticity": 0.029296875,
+    "n_top_matches": 7,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.16666666666666666,
+        "coverage_0.90": 0.16666666666666666,
+        "mean_best_auc": 0.6662291288375854
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.14285714285714285,
+        "mean_best_auc": 0.7367334365844727
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.25,
+        "coverage_0.90": 0.25,
+        "mean_best_auc": 0.7821120023727417
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.585298478603363
+      }
+    },
+    "name": "topk_w1024_k20_ep200",
+    "n_features": 1024,
+    "epochs": 200,
+    "recon_loss": 0.11702468246221542,
+    "l0": 20.0,
+    "var_explained": 0.6954025002049067,
+    "wall_time_s": 130.0729558467865
+  },
+  {
+    "run_id": "l1_w1024_loose_ep200",
+    "feed": "acts",
+    "variant": "l1",
+    "n_sae_features": 1024,
+    "n_active": 1024,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.3137254901960784,
+    "coverage_0.90": 0.3333333333333333,
+    "mean_best_auc": 0.7556296586990356,
+    "monosemanticity": 0.126953125,
+    "n_top_matches": 16,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.26666666666666666,
+        "coverage_0.90": 0.3,
+        "mean_best_auc": 0.7261461019515991
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.9021124839782715
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.625,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.8443481922149658
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.6138588786125183
+      }
+    },
+    "name": "l1_w1024_loose_ep200",
+    "n_features": 1024,
+    "epochs": 200,
+    "recon_loss": 0.33090370893478394,
+    "l0": 95.12610626220703,
+    "var_explained": 0.2736127337602362,
+    "wall_time_s": 138.69151210784912
+  }
+]

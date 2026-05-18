@@ -1,0 +1,69 @@
+{
+  "continuous": [
+    {
+      "label": "gdp_dev",
+      "best_corr": 0.22674895823001862,
+      "best_sae_feature": 418
+    },
+    {
+      "label": "leverage",
+      "best_corr": 0.5106605887413025,
+      "best_sae_feature": 86
+    },
+    {
+      "label": "rate",
+      "best_corr": 0.19081981480121613,
+      "best_sae_feature": 53
+    },
+    {
+      "label": "gdp_trend",
+      "best_corr": 0.23979586362838745,
+      "best_sae_feature": 418
+    },
+    {
+      "label": "gdp_volatility",
+      "best_corr": -0.28133609890937805,
+      "best_sae_feature": 982
+    },
+    {
+      "label": "cons_share_food",
+      "best_corr": 0.41864556074142456,
+      "best_sae_feature": 430
+    },
+    {
+      "label": "cons_share_durables",
+      "best_corr": 0.3821444511413574,
+      "best_sae_feature": 934
+    }
+  ],
+  "binary_regime_aucs": [
+    {
+      "label": "phase:contraction",
+      "max_auc": 0.5554819703102112
+    },
+    {
+      "label": "phase:expansion",
+      "max_auc": 0.6055015921592712
+    },
+    {
+      "label": "phase:fiscal_active",
+      "max_auc": 0.5196430683135986
+    },
+    {
+      "label": "phase:high_leverage",
+      "max_auc": 0.6164527535438538
+    },
+    {
+      "label": "phase:high_rate",
+      "max_auc": 0.5489919185638428
+    },
+    {
+      "label": "phase:monetary_active",
+      "max_auc": 0.5090088844299316
+    }
+  ],
+  "sae_ckpt": "/Users/allans/code/econ-sae/runs/temporal_sentiment_experiment/jr_w1024_ep200.pt",
+  "wm_ckpt": "/Users/allans/code/econ-sae/runs/world_model_temporal_sentiment.pt",
+  "n_samples": 217600,
+  "n_sae_features": 1024
+}

@@ -1,0 +1,170 @@
+[
+  {
+    "run_id": "jr_w256_ep200",
+    "feed": "acts_deep",
+    "variant": "jumprelu",
+    "n_sae_features": 256,
+    "n_active": 256,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.35294117647058826,
+    "coverage_0.90": 0.43137254901960786,
+    "mean_best_auc": 0.7676118612289429,
+    "monosemanticity": 0.48046875,
+    "n_top_matches": 18,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.36666666666666664,
+        "coverage_0.90": 0.36666666666666664,
+        "mean_best_auc": 0.7297669649124146
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.7142857142857143,
+        "mean_best_auc": 0.9279331564903259
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.375,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.8367676138877869
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.16666666666666666,
+        "coverage_0.90": 0.16666666666666666,
+        "mean_best_auc": 0.6775869727134705
+      }
+    },
+    "name": "jr_w256_ep200",
+    "n_features": 256,
+    "epochs": 200,
+    "recon_loss": 0.0003417443367652595,
+    "l0": 63.81407165527344,
+    "var_explained": 0.9982841767689665,
+    "wall_time_s": 380.57640504837036,
+    "conj_auc_per_feature": {
+      "durables_firm_high_inv": 0.5,
+      "firm_AND_indebted_AND_high_inventory": 0.5,
+      "food_firm_low_inv": 0.9991133213043213,
+      "prime_AND_high_cash": 0.9842156171798706,
+      "retiree_AND_decumulating": 0.9057086706161499,
+      "services_firm_high_output": 0.999049186706543,
+      "young_AND_high_mpc_AND_expansion": 0.9399282932281494,
+      "young_AND_indebted": 0.8661258220672607
+    }
+  },
+  {
+    "run_id": "jr_w1024_ep200",
+    "feed": "acts_deep",
+    "variant": "jumprelu",
+    "n_sae_features": 1024,
+    "n_active": 1024,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.29411764705882354,
+    "coverage_0.90": 0.37254901960784315,
+    "mean_best_auc": 0.7657887935638428,
+    "monosemanticity": 0.1826171875,
+    "n_top_matches": 15,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.3,
+        "coverage_0.90": 0.3333333333333333,
+        "mean_best_auc": 0.7343352437019348
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.8918505311012268
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.375,
+        "coverage_0.90": 0.75,
+        "mean_best_auc": 0.8416830897331238
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.6747922897338867
+      }
+    },
+    "name": "jr_w1024_ep200",
+    "n_features": 1024,
+    "epochs": 200,
+    "recon_loss": 0.04033910110592842,
+    "l0": 92.44325256347656,
+    "var_explained": 0.8136194730268583,
+    "wall_time_s": 1177.374892950058,
+    "conj_auc_per_feature": {
+      "durables_firm_high_inv": 0.5,
+      "firm_AND_indebted_AND_high_inventory": 0.5,
+      "food_firm_low_inv": 0.99980229139328,
+      "prime_AND_high_cash": 0.9014251232147217,
+      "retiree_AND_decumulating": 0.9376832246780396,
+      "services_firm_high_output": 0.9990298748016357,
+      "young_AND_high_mpc_AND_expansion": 0.9676869511604309,
+      "young_AND_indebted": 0.9278373718261719
+    }
+  },
+  {
+    "run_id": "l1_w1024_loose_ep200",
+    "feed": "acts_deep",
+    "variant": "l1",
+    "n_sae_features": 1024,
+    "n_active": 1024,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.0196078431372549,
+    "coverage_0.90": 0.0784313725490196,
+    "mean_best_auc": 0.63185054063797,
+    "monosemanticity": 0.0009765625,
+    "n_top_matches": 1,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.06666666666666667,
+        "mean_best_auc": 0.6097385883331299
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.6885432004928589
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.125,
+        "coverage_0.90": 0.25,
+        "mean_best_auc": 0.7265657782554626
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.5499818921089172
+      }
+    },
+    "name": "l1_w1024_loose_ep200",
+    "n_features": 1024,
+    "epochs": 200,
+    "recon_loss": 0.0022965106181800365,
+    "l0": 23.576608657836914,
+    "var_explained": 0.9884727641251208,
+    "wall_time_s": 1680.1268391609192,
+    "conj_auc_per_feature": {
+      "durables_firm_high_inv": 0.5,
+      "firm_AND_indebted_AND_high_inventory": 0.5,
+      "food_firm_low_inv": 0.9088791608810425,
+      "prime_AND_high_cash": 0.5815020203590393,
+      "retiree_AND_decumulating": 0.7532936334609985,
+      "services_firm_high_output": 0.9774652123451233,
+      "young_AND_high_mpc_AND_expansion": 0.7538455128669739,
+      "young_AND_indebted": 0.8375406265258789
+    }
+  }
+]

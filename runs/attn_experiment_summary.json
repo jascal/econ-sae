@@ -1,0 +1,134 @@
+[
+  {
+    "run_id": "jr_w256_ep200",
+    "feed": "acts_attn",
+    "variant": "jumprelu",
+    "n_sae_features": 256,
+    "n_active": 256,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.3333333333333333,
+    "coverage_0.90": 0.43137254901960786,
+    "mean_best_auc": 0.7668992877006531,
+    "monosemanticity": 0.35546875,
+    "n_top_matches": 17,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.3333333333333333,
+        "coverage_0.90": 0.3333333333333333,
+        "mean_best_auc": 0.7129403352737427
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.5714285714285714,
+        "mean_best_auc": 0.9090956449508667
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.5,
+        "coverage_0.90": 1.0,
+        "mean_best_auc": 0.9590767621994019
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.6145614385604858
+      }
+    },
+    "name": "jr_w256_ep200",
+    "n_features": 256,
+    "epochs": 200,
+    "recon_loss": 0.0001170906689367257,
+    "l0": 27.416658401489258,
+    "var_explained": 0.9995070861716504,
+    "wall_time_s": 251.40064787864685,
+    "conj_auc_per_feature": {
+      "durables_firm_high_inv": 0.999570369720459,
+      "firm_AND_indebted_AND_high_inventory": 0.9132904410362244,
+      "food_firm_low_inv": 0.9986339807510376,
+      "prime_AND_high_cash": 0.9885419607162476,
+      "retiree_AND_decumulating": 0.9336717128753662,
+      "services_firm_high_output": 0.9985609650611877,
+      "young_AND_high_mpc_AND_expansion": 0.9394630789756775,
+      "young_AND_indebted": 0.9008818864822388
+    },
+    "conj_prevalence": {
+      "durables_firm_high_inv": 0.014705882407724857,
+      "firm_AND_indebted_AND_high_inventory": 0.026204043999314308,
+      "food_firm_low_inv": 0.029411764815449715,
+      "prime_AND_high_cash": 0.20979319512844086,
+      "retiree_AND_decumulating": 0.017155330628156662,
+      "services_firm_high_output": 0.014705882407724857,
+      "young_AND_high_mpc_AND_expansion": 0.009191176854074001,
+      "young_AND_indebted": 0.00454503670334816
+    }
+  },
+  {
+    "run_id": "jr_w1024_ep200",
+    "feed": "acts_attn",
+    "variant": "jumprelu",
+    "n_sae_features": 1024,
+    "n_active": 1024,
+    "n_gt_features": 51,
+    "coverage_0.95": 0.35294117647058826,
+    "coverage_0.90": 0.4117647058823529,
+    "mean_best_auc": 0.7618699073791504,
+    "monosemanticity": 0.2841796875,
+    "n_top_matches": 18,
+    "per_tier": {
+      "categorical": {
+        "n_features": 30,
+        "coverage_0.95": 0.3333333333333333,
+        "coverage_0.90": 0.3333333333333333,
+        "mean_best_auc": 0.7098451852798462
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.42857142857142855,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.879302442073822
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.625,
+        "coverage_0.90": 1.0,
+        "mean_best_auc": 0.9677854776382446
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.0,
+        "mean_best_auc": 0.6104344725608826
+      }
+    },
+    "name": "jr_w1024_ep200",
+    "n_features": 1024,
+    "epochs": 200,
+    "recon_loss": 0.021026501432061195,
+    "l0": 117.9868392944336,
+    "var_explained": 0.9145145055635351,
+    "wall_time_s": 751.7721512317657,
+    "conj_auc_per_feature": {
+      "durables_firm_high_inv": 0.9993258714675903,
+      "firm_AND_indebted_AND_high_inventory": 0.9190985560417175,
+      "food_firm_low_inv": 0.9997204542160034,
+      "prime_AND_high_cash": 0.978457510471344,
+      "retiree_AND_decumulating": 0.9372392892837524,
+      "services_firm_high_output": 0.9996268153190613,
+      "young_AND_high_mpc_AND_expansion": 0.9685288667678833,
+      "young_AND_indebted": 0.9402866959571838
+    },
+    "conj_prevalence": {
+      "durables_firm_high_inv": 0.014705882407724857,
+      "firm_AND_indebted_AND_high_inventory": 0.026204043999314308,
+      "food_firm_low_inv": 0.029411764815449715,
+      "prime_AND_high_cash": 0.20979319512844086,
+      "retiree_AND_decumulating": 0.017155330628156662,
+      "services_firm_high_output": 0.014705882407724857,
+      "young_AND_high_mpc_AND_expansion": 0.009191176854074001,
+      "young_AND_indebted": 0.00454503670334816
+    }
+  }
+]

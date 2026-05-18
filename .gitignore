@@ -22,10 +22,32 @@ ENV/
 .DS_Store
 .claude/
 
-# Project artifacts (generated)
-runs/
-*.pt
+# Project artifacts (generated, mostly ignored). We selectively
+# whitelist small summaries / the rendered HTML / the Phase 6.2
+# headline-result checkpoints so they are directly readable on GitHub.
+# Order matters: git applies later rules over earlier ones, but
+# negations cannot un-exclude a child of a fully-excluded directory.
+# So we ignore at the file-glob level, then re-include specific paths.
 *.ckpt
+*.swp
+
+# Ignore everything at runs/ level
+runs/*
+
+# Re-include small summaries + rendered HTML for direct sharing
+!runs/*_summary.json
+!runs/visualize.html
+
+# Re-include the Phase 6.2 unified-recipe artifacts: the headline
+# "6/6 regime in a single run" result. World-model + 3 SAE checkpoints
+# total ~7 MB; the 86 MB activations npz stays ignored (regeneratable
+# in ~3 minutes via scripts/regime_dual_head_experiment.py).
+!runs/world_model_regime_dual_head.pt
+!runs/regime_dual_head_experiment/
+
+# Inside the un-ignored subdir, re-apply per-file ignore then negate .pt
+runs/regime_dual_head_experiment/*
+!runs/regime_dual_head_experiment/*.pt
 
 # Generated data bundles -- checked in by default so the repo is usable
 # without running scripts/build_data.py first. Comment these in to track
