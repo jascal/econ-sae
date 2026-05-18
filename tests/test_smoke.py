@@ -67,16 +67,45 @@ def test_conservation_with_shocks():
         assert v < 1e-6, f"{k} = {v} exceeds tol"
 
 
+def test_phase3_features_optional_and_conserve():
+    """Sentiment-driven MPC, Taylor rule, and I-O network are all optional;
+    each must (a) leave conservation untouched and (b) actually change the
+    macro dynamics relative to the off-baseline."""
+    import numpy as np
+    base = Economy.small()
+    base_traj = base.rollout(40)
+    base_gdps = np.array([m["GDP"] for m in base_traj.macros])
+
+    for name, kwargs in [
+        ("sentiment", dict(sentiment_strength=0.20)),
+        ("taylor",    dict(taylor_rule=True)),
+        ("io_network", dict(io_network=True)),
+    ]:
+        econ = Economy.small()
+        for k, v in kwargs.items():
+            setattr(econ, k, v)
+        traj = econ.rollout(40)
+        res = check_conservation(traj)
+        for rk, rv in res.items():
+            assert rv < 1e-6, f"{name}: {rk}={rv}"
+        # Dynamics should differ from baseline (at least one period)
+        gdps = np.array([m["GDP"] for m in traj.macros])
+        assert not np.allclose(gdps, base_gdps), f"{name}: dynamics identical to baseline"
+
+
 def test_all_txn_kinds_fire_under_diverse_shocks():
-    """With stochastic shocks across enough periods, every txn kind should appear."""
+    """With stochastic shocks across enough periods, every txn kind should appear.
+
+    `b2b_purchase` is conditional on the I-O network being enabled, so we
+    expect it only when `io_network=True`.
+    """
     econ = Economy.small()
+    econ.io_network = True
     sched = draw_shock_schedule(n_periods=80, seed=0)
     traj = econ.rollout(80, shocks=sched.shocks)
     kinds = {t.kind for p in traj.txn_log for t in p}
-    # All 9 kinds present
     for k in TXN_KINDS:
         assert k in kinds, f"missing txn kind: {k}"
-    # Each sector seen in at least one purchase
     sectors = {t.sector for p in traj.txn_log for t in p if t.sector}
     for sec in GOODS_SECTORS:
         assert sec in sectors

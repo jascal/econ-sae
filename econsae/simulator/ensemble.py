@@ -48,6 +48,10 @@ def generate_ensemble(
     seed: int = 0,
     interest_rate: float = 0.02,
     sentiment_strength: float = 0.0,
+    taylor_rule: bool = False,
+    taylor_pi_weight: float = 0.5,
+    taylor_y_weight: float = 0.5,
+    io_network: bool = False,
 ) -> Ensemble:
     """Generate an ensemble of trajectories with reproducible seeded shocks.
 
@@ -71,6 +75,10 @@ def generate_ensemble(
             seed=sub_seed, interest_rate=interest_rate,
         )
         econ.sentiment_strength = sentiment_strength
+        econ.taylor_rule = taylor_rule
+        econ.taylor_pi_weight = taylor_pi_weight
+        econ.taylor_y_weight = taylor_y_weight
+        econ.io_network = io_network
         sched = draw_shock_schedule(n_periods=n_periods, seed=sub_seed)
         traj = econ.rollout(n_periods=n_periods, shocks=sched.shocks)
         ens.trajectories.append(traj)

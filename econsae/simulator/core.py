@@ -54,7 +54,7 @@ from econsae.embeddings import (
     SECTOR_HH, SECTOR_FIRM, SECTOR_GOV, SECTOR_BANK,
 )
 from econsae.sectors import (
-    GOODS_SECTORS, COHORT_PROFILES, FIRM_SECTOR_PROFILES, ces_share,
+    GOODS_SECTORS, COHORT_PROFILES, FIRM_SECTOR_PROFILES, IO_MATRIX, ces_share,
 )
 
 
@@ -64,7 +64,8 @@ from econsae.sectors import (
 # ---------------------------------------------------------------------------
 TXN_KINDS = (
     "wage",
-    "purchase",          # subkind = sector in {food, services, durables}
+    "purchase",          # HH -> firm; subkind = sector in {food, services, durables}
+    "b2b_purchase",      # firm -> firm intermediate goods (when io_network enabled)
     "tax",
     "transfer",
     "loan_origination",
@@ -116,6 +117,19 @@ class Transaction:
             assert sec is not None, "purchase txn needs a sector"
             # HH = money-sender (buyer), firm = money-receiver (seller)
             s.add(GOODS_IN_COORDS[sec], +self.side_amount)
+            r.add(GOODS_OUT_COORDS[sec], +self.side_amount)
+            r.add(INVENTORY_COORDS[sec], -self.side_amount)
+
+        elif self.kind == "b2b_purchase":
+            sec = self.sector
+            assert sec is not None, "b2b_purchase txn needs a sector"
+            # Buyer firm = money-sender; seller firm = money-receiver.
+            # The buyer accumulates the input goods into its own inv_<sec>
+            # coord (re-used semantically as "intermediate stock") so the
+            # buyer's production step can draw from it. The seller's
+            # inv_<sec> drops because the goods left.
+            s.add(GOODS_IN_COORDS[sec], +self.side_amount)
+            s.add(INVENTORY_COORDS[sec], +self.side_amount)
             r.add(GOODS_OUT_COORDS[sec], +self.side_amount)
             r.add(INVENTORY_COORDS[sec], -self.side_amount)
 
@@ -186,8 +200,31 @@ class Economy:
     sentiment_expansion_thr: float = 1.10
     sentiment_contraction_thr: float = 0.90
     sentiment_strength: float = 0.0    # 0 = off (default keeps backward compat)
+    # --- Taylor-rule central bank --------------------------------------------
+    # When taylor_rule=True the bank's `price` coord (interest rate) is set
+    # each period by a standard Taylor rule:
+    #   i_t = max(0, base + pi_w * (inflation - target) + y_w * output_gap)
+    # using inflation = % change in mean firm price over one period and
+    # output_gap = (GDP[t-1] - trailing_mean) / trailing_mean. Both
+    # quantities come from history buffers that live OUTSIDE agent state,
+    # so the world model sees rate movements driven by macros the simulator
+    # only knows from past periods.
+    taylor_rule: bool = False
+    taylor_base_rate: float = 0.02
+    taylor_pi_weight: float = 0.5
+    taylor_pi_target: float = 0.0
+    taylor_y_weight: float = 0.5
+    # --- Input-output firm network ------------------------------------------
+    # When io_network=True, firms purchase intermediates from each other
+    # before producing, using the IO_MATRIX from econsae.sectors. Each
+    # firm's own-sector production then both consumes its on-hand
+    # intermediates (held in inv_<other_sectors>) and adds to its
+    # inv_<own_sector>. With io_network=False (default) firms produce from
+    # labor alone, preserving Phase 1 behavior.
+    io_network: bool = False
     _last_tax_revenue: float = 0.0
     _gdp_history: list[float] = field(default_factory=list)
+    _price_history: list[float] = field(default_factory=list)
 
     @classmethod
     def small(cls, households_per_cohort: int = 4, firms_per_sector: int = 1,
@@ -235,6 +272,27 @@ class Economy:
 
         if shock:
             self._apply_shock(shock)
+
+        # Taylor-rule monetary policy: set the policy rate from observed
+        # inflation and output gap BEFORE shocks. A monetary shock in the
+        # current period overrides Taylor's setting (exogenous central-bank
+        # intervention beats the rule).
+        if (self.taylor_rule
+                and len(self._gdp_history) >= self.sentiment_window + 1
+                and len(self._price_history) >= 2):
+            p_now = self._price_history[-1]
+            p_prev = self._price_history[-2]
+            inflation = (p_now - p_prev) / max(p_prev, 1e-9)
+            trailing = self._gdp_history[-(self.sentiment_window + 1):-1]
+            trailing_mean = sum(trailing) / max(len(trailing), 1)
+            last_gdp = self._gdp_history[-1]
+            y_gap = (last_gdp - trailing_mean) / max(trailing_mean, 1e-9)
+            new_rate = (
+                self.taylor_base_rate
+                + self.taylor_pi_weight * (inflation - self.taylor_pi_target)
+                + self.taylor_y_weight * y_gap
+            )
+            self.bank().set("price", max(0.0, float(new_rate)))
 
         # Sentiment multiplier from past GDPs (NOT stored in any agent
         # coord). Set to 1.0 if the buffer is too short OR the simulator is
@@ -294,13 +352,91 @@ class Economy:
             ))
             txns[-1].apply(ag)
 
+        # ---- 2c. B2B intermediate purchases (when io_network is enabled) ----
+        # Each firm buys the intermediates it needs to produce its expected
+        # output, sourced from the corresponding sector's firm. Goods flow
+        # firm -> firm, money flows in the opposite direction; the buyer
+        # accumulates intermediates in its own inv_<sec> coord for the
+        # production step to draw down. Per-period flow conservation
+        # (sum goods_in == sum goods_out per sector) holds by construction.
+        if self.io_network:
+            firms_by_sec_map = {sec: self.agent_set.by_firm_sector(sec)
+                                for sec in GOODS_SECTORS}
+            for buyer in firms:
+                buyer_sec = buyer.firm_sector
+                if buyer_sec is None:
+                    continue
+                target_output = max(buyer.get("expectation"), 0.0)
+                if target_output <= 1e-6:
+                    continue
+                for input_sec in GOODS_SECTORS:
+                    ratio = IO_MATRIX.get(buyer_sec, {}).get(input_sec, 0.0)
+                    if ratio <= 0.0:
+                        continue
+                    need = ratio * target_output
+                    suppliers = firms_by_sec_map.get(input_sec, [])
+                    if not suppliers:
+                        continue
+                    if input_sec == buyer_sec and buyer in suppliers:
+                        # Self-supply: don't transact with yourself; we'll
+                        # handle the own-sector intermediate need in the
+                        # production step by reserving a slice of new output.
+                        continue
+                    seller = suppliers[0]
+                    price = max(seller.get("price"), 1e-9)
+                    avail = max(seller.get(INVENTORY_COORDS[input_sec]), 0.0)
+                    qty = min(need, avail)
+                    cost = qty * price
+                    if cost > buyer.get("money"):
+                        qty = max(0.0, buyer.get("money") / price)
+                        cost = qty * price
+                    if qty <= 1e-9:
+                        continue
+                    txns.append(Transaction(
+                        kind="b2b_purchase", sender=buyer.name,
+                        receiver=seller.name, amount=cost,
+                        sector=input_sec, side_amount=qty,
+                        period=self.period,
+                    ))
+                    txns[-1].apply(ag)
+
         # ---- 3. Production (per-sector) ----
         for f in firms:
             sec = f.firm_sector
             target = max(f.get("expectation"), 0.0)
             hours_needed = target / max(f.get("productivity"), 1e-9)
-            # Hours actually committed; cap by available labor pool implicitly via wages step
-            f.add(INVENTORY_COORDS[sec], hours_needed * f.get("productivity"))
+            output = hours_needed * f.get("productivity")
+            if self.io_network and sec is not None:
+                # Cap output by the available intermediates from each input
+                # sector. Self-sector intermediates are subtracted from the
+                # firm's pre-production stock; the new output is *added* to
+                # the same coord afterward.
+                io_row = IO_MATRIX.get(sec, {})
+                # Other-sector inputs constrain output:
+                for input_sec, ratio in io_row.items():
+                    if ratio <= 0.0 or input_sec == sec:
+                        continue
+                    available = f.get(INVENTORY_COORDS[input_sec])
+                    if ratio > 0:
+                        output = min(output, available / ratio)
+                # Self-sector ratio: each unit produced consumes `ratio`
+                # of own-sector stock, so net inventory delta is
+                # output * (1 - ratio). We need output*(1 - ratio) >= 0;
+                # since ratio < 1 always, this holds.
+                output = max(output, 0.0)
+                # Deduct other-sector intermediates
+                for input_sec, ratio in io_row.items():
+                    if ratio <= 0.0:
+                        continue
+                    if input_sec == sec:
+                        # Net own-sector inventory change handled below.
+                        continue
+                    f.add(INVENTORY_COORDS[input_sec], -ratio * output)
+                # Own-sector: net add = output * (1 - self_ratio)
+                self_ratio = io_row.get(sec, 0.0)
+                f.add(INVENTORY_COORDS[sec], output * (1.0 - self_ratio))
+            else:
+                f.add(INVENTORY_COORDS[sec], output)
 
         # ---- 4. Firm credit: top up cash if wage bill exceeds cash ----
         firm_hours_needed = {
@@ -546,6 +682,12 @@ class Economy:
         self._last_tax_revenue = float(macros["tax_revenue"])
         # Track GDP for the sentiment buffer (not in agent state).
         self._gdp_history.append(float(macros["GDP"]))
+        # Track mean firm price for the Taylor-rule inflation calculation.
+        firms = self.firms()
+        if firms:
+            self._price_history.append(
+                float(np.mean([f.get("price") for f in firms]))
+            )
         self.period += 1
         return snapshot, txns, macros
 

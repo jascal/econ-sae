@@ -151,6 +151,20 @@ FIRM_SECTOR_PROFILES: dict[str, FirmSectorProfile] = {
 }
 
 
+# --- Input-output matrix (B2B intermediate goods flows) --------------------
+# IO_MATRIX[my_sector][input_sector] = units of input goods required per
+# unit of own-sector output. When the simulator's io_network feature is
+# enabled, every firm must purchase intermediates from other firms before
+# producing -- creating a real input-output network where a productivity
+# shock to durables (an upstream supplier to every sector) propagates
+# through goods flows even when no shock hits food or services directly.
+IO_MATRIX: dict[str, dict[str, float]] = {
+    "food":     {"food": 0.05, "services": 0.05, "durables": 0.10},
+    "services": {"food": 0.05, "services": 0.05, "durables": 0.05},
+    "durables": {"food": 0.05, "services": 0.05, "durables": 0.10},
+}
+
+
 # --- Helpers ----------------------------------------------------------------
 def cohort_from_code(code: int) -> str | None:
     for name, c in HH_COHORT_CODES.items():

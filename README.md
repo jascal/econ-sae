@@ -514,6 +514,85 @@ tiers and a *known structural recipe* for each:
 
 That two-decoder recipe is the headline result of the project.
 
+### Phase 3: Polygram bridge, GatedSAE, Taylor rule, I-O network
+
+Phase 3 closes the original project brief by wiring a Polygram bridge,
+testing one more SAE-side intervention for regime features, and adding
+two simulator-side features that make the benchmark substantially
+richer for future SAE experiments.
+
+**Polygram bridge** (`econsae/polygram_bridge.py`,
+`scripts/polygram_demo.py`). Unlike sm-sae's 8-feature MPSRung1 slice,
+econ-sae's full 51-feature vocabulary fits in an `HEA_Rung2(n_qubits=6)`
+encoding (64 feature slots), no truncation. Each Feature's `beta` is
+its best-recovered AUC minus 0.5, so easy categorical features get
+`beta = 0.5` and unrecovered regime features get `beta ~ 0.05`. The
+demo runs an interference sweep on the (firm_sector:food,
+food_firm_low_inv) pair (cross-tier, structurally related) plus
+cancellation experiments across 10 hand-picked pair categories
+(within-tier, cross-tier, structurally related, cohort sanity-check,
+shock sanity-check). All cancellations converge to overlap ~0.77
+under the HEA_Rung2 encoding's structural floor; the per-pair "before"
+overlaps and the interference-sweep range (0.77-1.00) reveal which
+feature axes carry meaningful phase modulation in econ-sae's
+substrate.
+
+**GatedSAE** (`econsae/sae/models.py`,
+`scripts/gated_sae_experiment.py`). Rajamanoharan-style gated SAE with
+separate gate (Heaviside) and magnitude (ReLU) heads sharing tied
+weights up to a learnable rescaling, with an auxiliary
+reconstruction-from-gate loss for gradient flow. Hypothesis: explicit
+step-shaped gating should align better with binary threshold labels
+(`phase:expansion := GDP[t] > 1.10 * trailing_mean`) than the smooth
+ReLU activations of L1/JumpReLU.
+
+Result: **the gated architecture is essentially neutral.** Across
+matched widths on the macro-feed v2 substrate, GatedSAE matches or
+slightly beats JumpReLU on regime mAUC (0.865 vs 0.864 at width 256)
+but the three plateaued features (`phase:expansion`, `phase:contraction`,
+`phase:high_rate`) stay at AUC 0.72-0.82. The bottleneck for those
+isn't the activation shape; it's that the labels are *ratios* of input
+dimensions (`GDP[t] / mean(GDP[t-4..t-1])`) and neither ReLU nor
+Heaviside features can naturally compute division. The real fix would
+be feature-engineering the ratio directly into the input.
+
+**Taylor-rule central bank** (`econsae.simulator.core.Economy.taylor_rule`).
+The central bank sets the policy rate each period from observed
+inflation (mean firm-price change) and output gap
+(`GDP[t] - trailing_mean`). With `taylor_rule=True`, rate volatility
+jumps from std 0.01 to std 0.04 and the rate range widens from
+[0, 0.04] to [0, 0.23]. Conservation holds at 1.85e-13. Like
+sentiment-driven MPC, the Taylor rule uses history buffers (`_gdp_history`,
+`_price_history`) that live outside agent state, so monetary policy
+becomes a non-Markov channel that should reward history-encoding in
+the world model. (A future experiment can test whether this shifts
+the regime / windowed-regime ceilings.)
+
+**Input-output firm network**
+(`econsae.simulator.core.Economy.io_network`, `econsae.sectors.IO_MATRIX`).
+With `io_network=True`, firms purchase intermediate goods from each
+other before producing, using a 3 x 3 input-output matrix. The new
+`b2b_purchase` transaction kind preserves conservation by construction:
+buyer's `goods_in_<sector>` and `inv_<sector>` both rise, seller's
+`goods_out_<sector>` rises and `inv_<sector>` drops. Production then
+consumes intermediates from the firm's other-sector inventories and
+adds to its own-sector inventory. A productivity shock to durables (an
+upstream input supplier to every other sector) now propagates through
+goods flows even when no shock hits food or services directly --
+exactly the cross-sector cascade structure conjunctive SAE features
+should be able to disentangle. Conservation residual stays at 2.27e-13.
+
+Both simulator features are **default off** so all Phase 1-2 results
+remain reproducible. The `taylor_rule` and `io_network` flags accept
+through `generate_ensemble` for new experiments.
+
+| Phase 3 addition         | Files                                              | Effect on benchmark                                          |
+|--------------------------|----------------------------------------------------|--------------------------------------------------------------|
+| Polygram bridge          | `econsae/polygram_bridge.py`                       | Full 51-feature dictionary; phase-cancellation across tiers  |
+| GatedSAE                 | `econsae/sae/models.py`                            | Available alongside TopK / L1 / JumpReLU; matches but doesn't beat |
+| Taylor-rule central bank | `econsae/simulator/core.py`                        | Endogenous monetary policy; rate std 0.01 -> 0.04           |
+| Input-output network     | `econsae/simulator/core.py`, `econsae/sectors.py`  | New `b2b_purchase` txn kind; cross-sector cascade structure  |
+
 ## Why econ-sae is *harder* than sm-sae
 
 The Standard Model factorizes cleanly: every particle is a tensor product
@@ -713,11 +792,16 @@ the full alignment matrix and per-tier metrics are written to
   recovered. The remaining 3 (expansion / contraction / high_rate)
   plateaued at ~0.79 — they're threshold-on-continuous-window features
   that need richer SAE compositions to fully recover.
-- **Phase 3**: Polygram bridge (Dictionary + InterferenceSweep across
-  the multi-decoder benchmark); gated SAE / supervised regime head to
-  close the remaining 3 threshold-on-window features; input-output
-  firm network; central-bank Taylor rule; calibration to historical
-  macro data.
+- **Phase 3** (latest): Polygram bridge over the full 51-feature
+  vocabulary; GatedSAE alongside TopK / L1 / JumpReLU (neutral on the
+  3 plateaued features -- bottleneck is label-as-ratio, not activation
+  shape); Taylor-rule central bank and input-output firm network in the
+  simulator (both default off, both conserve, both produce
+  differentiated dynamics for future experiments).
+- **Phase 4**: experiments that exercise Phase 3's new simulator
+  features (Taylor + I-O), feature-engineer the windowed-regime ratios
+  as explicit input dims, calibration to historical macro data,
+  optional LLM-augmented agents.
 
 ## Acknowledgements
 

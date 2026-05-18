@@ -160,10 +160,93 @@ class JumpReLUSAE(_BaseSAE):
 
 
 # ---------------------------------------------------------------------------
+class GatedSAE(_BaseSAE):
+    """Gated SAE (Rajamanoharan et al. 2024) with separate gate and magnitude
+    heads sharing tied weights up to a learnable rescaling.
+
+    Architecture (per feature):
+        gate_pre = W_enc (x - b_dec) + b_gate       # b_gate := b_enc
+        mag_pre  = (exp(r) * W_enc) (x - b_dec) + b_mag
+        gate     = Heaviside(gate_pre)              # binary {0, 1}
+        mag      = ReLU(mag_pre)                    # continuous magnitude
+        z        = gate * mag                       # SAE output
+
+    The Heaviside has zero gradient almost everywhere; the *auxiliary
+    loss* below trains W_enc and b_gate via differentiable ReLU on the
+    same gate pre-activation:
+        recon       = ||x - decode(z)||^2
+        aux_recon   = ||x - decode(ReLU(gate_pre))||^2
+        sparsity    = lambda * ||W_dec_columns||_2 * ||ReLU(gate_pre)||_1
+
+    The total training loss is `recon + aux_recon + sparsity`. We pack
+    `recon + aux_recon` into SaeOutput.recon_loss so the standard
+    training loop's `loss = recon_loss + sparsity_loss` works unchanged.
+
+    Hypothesis for econ-sae: the gate's explicit step-shaped activation
+    should align better with threshold-defined regime labels
+    (`phase:expansion := GDP[t] > 1.10 * trailing_mean`) than the smooth
+    ReLU activations of L1 / JumpReLU SAEs.
+    """
+
+    def __init__(self, input_dim: int, n_features: int, l1_coeff: float = 1e-3):
+        super().__init__(input_dim, n_features)
+        # Magnitude branch parameters (gate branch reuses W_enc + b_enc).
+        self.b_mag = nn.Parameter(torch.zeros(n_features))
+        self.r_mag = nn.Parameter(torch.zeros(n_features))   # log of mag scale
+        self.l1_coeff = l1_coeff
+
+    def _gate_pre(self, x: torch.Tensor) -> torch.Tensor:
+        return F.linear(x - self.b_dec, self.W_enc, self.b_enc)
+
+    def _mag_pre(self, x: torch.Tensor) -> torch.Tensor:
+        scale = self.r_mag.exp().unsqueeze(-1)          # (n_features, 1)
+        return F.linear(x - self.b_dec, self.W_enc * scale, self.b_mag)
+
+    def encode(self, x: torch.Tensor) -> torch.Tensor:
+        gate = (self._gate_pre(x) > 0).float()
+        mag = F.relu(self._mag_pre(x))
+        return gate * mag
+
+    def sparsity_loss(self, z: torch.Tensor) -> torch.Tensor:
+        # Sparsity is computed in forward() from gate_pre directly; this
+        # stub keeps the _BaseSAE interface alive but is unused.
+        return torch.tensor(0.0, device=z.device)
+
+    def forward(self, x: torch.Tensor) -> SaeOutput:
+        gate_pre = self._gate_pre(x)
+        mag = F.relu(self._mag_pre(x))
+        gate = (gate_pre > 0).float()
+        z = gate * mag
+        x_hat = self.decode(z)
+        recon = F.mse_loss(x_hat, x)
+
+        # Auxiliary recon path: forces the gate encoder to encode
+        # reconstruction-relevant info even though the gate forward is
+        # binary (zero-gradient).
+        aux_z = F.relu(gate_pre)
+        aux_x_hat = self.decode(aux_z)
+        aux_recon = F.mse_loss(aux_x_hat, x)
+
+        # L1 sparsity on the auxiliary ReLU activations, scaled by decoder
+        # column norms (shrinkage-invariant trick from the SAE literature).
+        dec_norms = self.W_dec.norm(dim=0)
+        sparsity = self.l1_coeff * (aux_z * dec_norms).sum(dim=-1).mean()
+
+        l0 = float((z.abs() > 1e-9).float().sum(dim=-1).mean())
+        return SaeOutput(
+            x_hat=x_hat, z=z,
+            recon_loss=recon + aux_recon,
+            sparsity_loss=sparsity,
+            l0=l0,
+        )
+
+
+# ---------------------------------------------------------------------------
 def make_sae(kind: str, input_dim: int, n_features: int, **kwargs) -> _BaseSAE:
     if kind == "topk":     return TopKSAE(input_dim, n_features, **kwargs)
     if kind == "l1":       return L1SAE(input_dim, n_features, **kwargs)
     if kind == "jumprelu": return JumpReLUSAE(input_dim, n_features, **kwargs)
+    if kind == "gated":    return GatedSAE(input_dim, n_features, **kwargs)
     raise ValueError(f"Unknown SAE kind: {kind}")
 
 

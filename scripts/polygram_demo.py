@@ -1,15 +1,22 @@
-"""Phase C: econ-sae -> polygram Dictionary + cancellation runs.
+"""Phase 3: econ-sae -> polygram Dictionary + cancellation runs.
 
-STUB. Mirrors sm-sae's smsae/polygram_bridge.py once the Phase 0/1 SAE
-pipeline is in place.
+Requires the polygram extra:
+    pip install -e ".[polygram]"
+
+Usage:
+    python scripts/polygram_demo.py
 """
 
 from __future__ import annotations
 
+import os
+import sys
 
-def main():
-    print("scripts/polygram_demo.py: stub.")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO_ROOT)
+os.chdir(REPO_ROOT)
 
+from econsae.polygram_bridge import main
 
 if __name__ == "__main__":
     main()
