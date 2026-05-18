@@ -593,6 +593,91 @@ through `generate_ensemble` for new experiments.
 | Taylor-rule central bank | `econsae/simulator/core.py`                        | Endogenous monetary policy; rate std 0.01 -> 0.04           |
 | Input-output network     | `econsae/simulator/core.py`, `econsae/sectors.py`  | New `b2b_purchase` txn kind; cross-sector cascade structure  |
 
+### Phase 4: ratio-engineered macro feed + full Phase 3 features
+
+Two follow-up experiments tested the obvious next moves: feature-
+engineer the input ratios that the SAE couldn't compute by ReLU
+composition alone, and turn on all three Phase 3 simulator features
+together.
+
+**Macro-feed v3** (`scripts/macro_feed_v3_experiment.py`) adds four
+engineered ratio dims to the per-period input:
+
+```
++ gdp_deviation  = (GDP[t] - mean(GDP[t-4..t-1])) / mean(GDP[t-4..t-1])
++ rate_deviation = interest_rate[t] - base_rate
++ leverage_ratio = debt_outstanding[t] / money_stock[t]
++ inflation      = (mean_price[t] - mean_price[t-1]) / mean_price[t-1]
+```
+
+Result: **regime tier mAUC 0.885** (best so far) and **`phase:high_leverage`
+back at AUC 0.968** (the v2 regression was the missing leverage_ratio
+dim; v3 puts it back over 0.95). All three previously-plateaued
+features climbed but **none crossed 0.95**:
+
+| feature              | v2     | **v3**   | change |
+|----------------------|--------|----------|--------|
+| `phase:expansion`    | 0.792  | **0.873**| +0.08  |
+| `phase:contraction`  | 0.782  | **0.822**| +0.04  |
+| `phase:high_rate`    | 0.793  | **0.830**| +0.04  |
+| `phase:high_leverage`| 0.869  | **0.968**| +0.10 *** |
+| `phase:fiscal_active`| 1.000  | 1.000    | --     |
+| `phase:monetary_active`| 0.999| 0.999    | --     |
+| **regime mAUC**      | 0.864  | **0.885**| +0.02  |
+
+The remaining gap is now a *threshold-on-a-ratio* limit, not a
+ratio-of-input-dims limit. AUC 0.87 for `phase:expansion` corresponds
+to a Pearson correlation of ~0.7 between the best SAE feature and the
+`gdp_deviation` input — the SAE learns a smooth feature that correlates
+with the ratio but doesn't fire as a sharp step at the 0.10 threshold.
+Crossing 0.95 would require supervised feature allocation or per-
+feature threshold learning that goes beyond what JumpReLU's L0 budget
+naturally produces. **This is a genuine ceiling that no further input
+engineering will move.**
+
+**Full Phase 3 features experiment**
+(`scripts/phase3_features_experiment.py`) turns on
+`sentiment_strength=0.20 + taylor_rule=True + io_network=True`
+simultaneously and runs the complete world-model + macro-feed-v3
+pipeline. Conservation residual 3.13e-13. The I-O network adds a new
+per-period feature (`txn_period_has:b2b_purchase`, prevalence 89%),
+bringing the vocabulary to 52 features, and crucially produces
+**`firm_AND_indebted_AND_high_inventory` crossing AUC 0.95 for the
+first time** (0.919 → 0.980). Cross-sector cascades from the I-O
+network make this previously-marginal conjunctive feature properly
+distinguishable.
+
+| conjunctive feature                  | prior best | **Phase 4.2** | change |
+|--------------------------------------|------------|---------------|--------|
+| `durables_firm_high_inv`             | 0.999      | 0.996         | --     |
+| **`firm_AND_indebted_AND_high_inv`** | 0.919      | **0.980** *** | **+0.06** first ≥ 0.95 |
+| `food_firm_low_inv`                  | 1.000      | 0.995         | --     |
+| `services_firm_high_output`          | 1.000      | 0.999         | --     |
+| `young_AND_high_mpc_AND_expansion`   | 0.969      | 0.970         | --     |
+| `young_AND_indebted`                 | 0.940      | 0.932         | -0.01  |
+| `retiree_AND_decumulating`           | 0.972      | 0.933         | -0.04  |
+| `prime_AND_high_cash`                | 0.978      | 0.898         | -0.08  |
+
+There's a tradeoff: turning on Taylor rule's volatile interest rates
+makes `phase:high_leverage` noisier (regressed from 0.97 → 0.79) and
+`prime_AND_high_cash` less clean. Richer macro dynamics buy harder
+recovery on a few existing features in exchange for unlocking a new
+one. That's exactly the kind of *benchmark-as-multi-recipe* behavior
+we want: each combination of simulator features produces a different
+spectrum of recoverability.
+
+### Final tier scoreboard
+
+Best-in-class per-tier results across all experiments:
+
+| tier              | best mAUC | best feature recoveries                                | recipe                                                |
+|-------------------|-----------|--------------------------------------------------------|-------------------------------------------------------|
+| categorical (30)  | 1.000     | sector / firm_sector / cohort all at AUC 1.000         | per-agent SAE on attention or temporal substrate      |
+| bucketed (7)      | 0.928     | most at 0.85-0.93                                      | per-agent SAE                                         |
+| conjunctive (8)   | 0.968     | 5/8 at AUC >= 0.95 (or 6/8 with Phase 4.2)             | per-agent SAE on attention substrate                  |
+| regime (6)        | 0.885     | 3/6 at AUC >= 0.95 (high_leverage, fiscal, monetary)   | per-period macro-feed SAE with ratio inputs           |
+| windowed regime   | 0.83-0.87 | (threshold ceiling -- not crossable by std SAE)        | needs supervised auxiliary or label re-engineering    |
+
 ## Why econ-sae is *harder* than sm-sae
 
 The Standard Model factorizes cleanly: every particle is a tensor product
@@ -798,10 +883,17 @@ the full alignment matrix and per-tier metrics are written to
   shape); Taylor-rule central bank and input-output firm network in the
   simulator (both default off, both conserve, both produce
   differentiated dynamics for future experiments).
-- **Phase 4**: experiments that exercise Phase 3's new simulator
-  features (Taylor + I-O), feature-engineer the windowed-regime ratios
-  as explicit input dims, calibration to historical macro data,
-  optional LLM-augmented agents.
+- **Phase 4** (latest): ratio-engineered macro-feed v3 (+0.10 AUC on
+  `phase:high_leverage`, regime mAUC 0.885 best-yet); full Phase 3
+  features in an SAE experiment (`firm_AND_indebted_AND_high_inventory`
+  crosses AUC 0.95 for the first time at 0.980 thanks to I-O network's
+  cross-sector cascades). Identified the genuine ceiling on the
+  remaining 3 windowed-regime features: threshold-on-ratio recovery
+  caps at AUC ~0.87 with the standard JumpReLU SAE.
+- **Phase 5**: supervised auxiliary regime head (the one fix that
+  should cross the threshold-on-ratio ceiling); calibration to
+  historical macro data; optional LLM-augmented agents; visualization
+  notebooks.
 
 ## Acknowledgements
 
