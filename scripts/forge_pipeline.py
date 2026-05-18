@@ -112,9 +112,46 @@ def _build_macro_feed():
     return build_macro_feed_v3(ens.trajectories, ens.shock_schedules, wm)
 
 
+def _build_attn_acts_feed():
+    """Per-(period, agent) feed using the Phase 1.6 AttnWorldModel.
+
+    The Phase 1.6 attention experiment was run WITHOUT sentiment-driven
+    MPC (sentiment_strength=0), so the ensemble must be generated with
+    that setting for the feed activations to match the SAE's training
+    distribution.
+    """
+    from econsae.sae.data import Feed
+    from econsae.sae.world_model import (
+        AttnWorldModel, extract_attn_h1_activations,
+    )
+    from econsae.simulator.ensemble import generate_ensemble
+    from econsae.ground_truth import build_feature_matrix
+
+    ens = generate_ensemble(n_trajectories=128, n_periods=100, seed=0,
+                            sentiment_strength=0.0)
+    ckpt = torch.load(
+        os.path.join(REPO_ROOT, "runs", "world_model_attn.pt"),
+        map_location="cpu", weights_only=False,
+    )
+    wm = AttnWorldModel(**ckpt["config"])
+    wm.load_state_dict(ckpt["state_dict"])
+    wm.eval()
+    H1, idx = extract_attn_h1_activations(wm, ens.trajectories,
+                                           ens.shock_schedules)
+    fm = build_feature_matrix(ens.trajectories, ens.shock_schedules)
+    assert idx == fm.sample_index
+    return Feed(
+        name="attn_acts_for_forge",
+        X=torch.tensor(H1, dtype=torch.float32),
+        Y=fm.Y, feature_vocab=fm.feature_vocab, sample_index=fm.sample_index,
+        notes="AttnWorldModel h1, sentiment=0.0 (Phase 1.6 setup).",
+    )
+
+
 FEEDS = {
-    "acts":  _build_acts_feed,
-    "macro": _build_macro_feed,
+    "acts":      _build_acts_feed,
+    "macro":     _build_macro_feed,
+    "attn_acts": _build_attn_acts_feed,
 }
 
 

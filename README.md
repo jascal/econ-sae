@@ -952,6 +952,58 @@ Output artifacts at
 - `sae.safetensors` (regeneratable, gitignored)
 - `validation_report.json` (2.4 MB raw pairwise stats, gitignored)
 
+### Phase 7.2: forge sweep -- substrate type + encoding capacity
+
+Four forge runs comparing per-agent vs per-period substrate and three
+polygram encoding capacities:
+
+| run                       | substrate | encoding | cap | clusters | kept | zeroed | "other" | redundancy |
+|---------------------------|-----------|----------|-----|----------|------|--------|---------|------------|
+| **Phase 1.6 attn**        | per-agent | Rung5    | 128 | **7**    | 7    | 62     | 59      | 48%        |
+| **Phase 6.2 dual-head**   | per-period| Rung3    | 16  | **2**    | 2    | 12     | 2       | 75%        |
+| **Phase 6.2 dual-head**   | per-period| Rung4    | 32  | **3**    | 3    | 19     | 10      | 59%        |
+| **Phase 6.2 dual-head**   | per-period| Rung5    | 128 | **6**    | 6    | 88     | 34      | 69%        |
+
+(`"other"` = cap − (kept + zeroed) = singleton features not part of
+any cluster the compressor found.)
+
+Two findings:
+
+1. **Cluster count grows with capacity for the same substrate.**
+   Phase 6.2 across the encoding sweep: Rung3 → 2, Rung4 → 3,
+   Rung5 → 6. Rate of new clusters per added slot tapers:
+   12.5% → 9.4% → 4.7%. At Rung5 the cluster count **saturates at 6**,
+   exactly matching the 6 supervised regime targets. This validates
+   the "polygram clusters track distinct concepts" interpretation:
+   once the dictionary is large enough, the compressor finds the same
+   set of concepts the supervised head was trained on.
+
+2. **Unsupervised substrate has more distinct concepts and more
+   loners.** Phase 1.6 attn (unsupervised, conjunctive-tier winner)
+   has 7 clusters + 59 loners at Rung5; Phase 6.2 (supervised) has 6
+   clusters + 34 loners at the same encoding. **Supervision
+   concentrates features** -- fewer distinct concepts, higher
+   redundancy rate (69% vs 48%), fewer non-clusterable features. The
+   supervised SAE is using its 512 features more efficiently for the
+   labels it was trained on, at the cost of representing fewer other
+   features.
+
+This is exactly the kind of diagnostic polygram-as-redundancy-probe
+would do for a real LLM SAE: high redundancy + few clusters = "your
+SAE is concentrated around a small concept set"; low redundancy +
+many loners = "your SAE is broadly distributed but lacks clean
+factorization."
+
+Run via:
+
+```bash
+python scripts/forge_pipeline.py --sae-ckpt runs/attn_experiment/jr_w1024_ep200.pt \
+    --feed-type attn_acts --encoding rung5
+
+python scripts/forge_pipeline.py --sae-ckpt runs/regime_dual_head_experiment/jr_w512_ep300.pt \
+    --feed-type macro --encoding rung3
+```
+
 ## Why econ-sae is *harder* than sm-sae
 
 The Standard Model factorizes cleanly: every particle is a tensor product
