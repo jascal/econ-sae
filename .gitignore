@@ -48,6 +48,15 @@ runs/*
 runs/regime_dual_head_experiment/*
 !runs/regime_dual_head_experiment/*.pt
 
+# Forge pipeline outputs. forge_results.json (summary) and the
+# compressed safetensors are useful to share; the input safetensors
+# is regeneratable from the SAE .pt, and the 2.4 MB validation
+# report is regeneratable raw pairwise stats.
+!runs/forge/
+!runs/forge/**
+runs/forge/**/sae.safetensors
+runs/forge/**/validation_report.json
+
 # Generated data bundles -- checked in by default so the repo is usable
 # without running scripts/build_data.py first. Comment these in to track
 # only the build scripts:

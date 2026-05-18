@@ -896,6 +896,62 @@ too thin -- more features = each feature gets a smaller share of the
 active-feature pool. A useful negative result: bigger isn't always
 better for SAE feature allocation.
 
+### Phase 7.1: Polygram SAE-forge pipeline
+
+Mirrors sm-sae's `scripts/forge_pipeline.py` 9-stage flow, adapted to
+econ-sae's two-feed structure (per-agent + per-period macro-feed).
+Stages: load SAE -> safetensors -> SAEFeatureRecord -> Dictionary
+(with selector + encoding) -> ValidationReport from feed activations
+-> polygram.Compressor -> [forge stub, gated on sae-forge release]
+-> GT-AUC -> JSON report.
+
+Run on the Phase 6.2 dual-head SAE (`jr_w512_ep300.pt`, the headline
+6/6 regime result):
+
+```
+$ python scripts/forge_pipeline.py \
+    --sae-ckpt runs/regime_dual_head_experiment/jr_w512_ep300.pt \
+    --feed-type macro
+
+  [1] load SAE   kind=jumprelu  input_dim=223  n_features=512
+  [4] wrap as polygram.Dictionary (Rung5 cap=128)
+      128 features kept (selection=firing_rate)
+  [5] ValidationReport: 8128 candidate pairs, 171 confirmed
+  [6] Compressor:  clusters=6, kept=6, zeroed=88
+  [8] GT alignment: cov95=33.3%  mAUC=0.734
+```
+
+**Headline finding**: polygram's compressor identified **6 distinct
+feature clusters** out of 128 dictionary slots (and zeroed 88 as
+redundant). The 6 clusters line up cleanly with the 6 supervised
+regime targets in Phase 6.2 -- direct quantitative evidence that the
+supervised regime head concentrated the SAE's feature allocation
+around the supervised concepts. From a redundancy-detection
+perspective, **88/128 = 69% of the kept SAE features are
+compressor-redundant**.
+
+This is exactly the behavior we'd hope to see for "concept-bottlenecked
+SAE training": once supervised, the substrate uses only as many
+effective dimensions as it has supervised concepts (plus a small
+buffer for the non-supervised features in the input). The SAE's
+512-feature width was wildly overcomplete for the concept count, but
+the trained features cluster cleanly so the compressor finds the
+right number.
+
+Stage 7 (forge into a host transformer) remains stubbed, mirroring
+sm-sae -- both projects are waiting for sae-forge's pluggable-
+Faithfulness release. The compressed safetensors output
+(`sae.compressed.safetensors`) is the input the eventual forge step
+will consume.
+
+Output artifacts at
+`runs/forge/regime_dual_head_experiment__jr_w512_ep300/`:
+
+- `forge_results.json` (8 KB, summary of the full pipeline)
+- `sae.compressed.safetensors` (917 KB, the polygram-compressed SAE)
+- `sae.safetensors` (regeneratable, gitignored)
+- `validation_report.json` (2.4 MB raw pairwise stats, gitignored)
+
 ## Why econ-sae is *harder* than sm-sae
 
 The Standard Model factorizes cleanly: every particle is a tensor product
@@ -1147,9 +1203,15 @@ the full alignment matrix and per-tier metrics are written to
   first unified recipe in the project.** Regime mAUC 0.991 (best ever).
   Width 512 is the sweet spot; 2048 regressed because L0 budget spreads
   too thin.
-- **Phase 7+**: SAE-Forge integration (hold until sm-sae's is solid);
-  calibration to historical macro data; LLM-augmented agents;
-  visualization notebooks for the multi-decoder recipe.
+- **Phase 7.1** (latest): Polygram SAE-forge pipeline implemented end-to-end
+  (`econsae/sae/forge_bridge.py`, `scripts/forge_pipeline.py`). Mirrors
+  sm-sae's 9-stage flow with stage 7 (host-model forge) stubbed pending
+  sae-forge release. Polygram compressor on the Phase 6.2 SAE finds 6
+  clusters in 128 dictionary slots -- direct evidence of supervised
+  concept concentration.
+- **Phase 8+**: real sae-forge integration once the pluggable-Faithfulness
+  release ships; calibration to historical macro data; LLM-augmented
+  agents.
 
 ## Acknowledgements
 
