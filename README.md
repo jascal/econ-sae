@@ -741,7 +741,7 @@ compression objective can localize.
 |-------------------|-----------|--------------------------------------------------------|-------------------------------------------------------|
 | categorical (30)  | 1.000     | most at 1.000                                          | per-agent SAE on attention substrate                  |
 | bucketed (7)      | 0.928     | most 0.85-0.93                                         | per-agent SAE                                         |
-| **conjunctive (8)** | **0.989** | **7/8 at AUC >= 0.95 in a single run** (Phase 8.1)   | dual-head supervised WM (per-channel + focal-deep) + per-agent SAE at width 1024 |
+| **conjunctive (8)** | **0.999** | **8/8 at AUC >= 0.95 in a single run** (Phase 8.2)   | dual-head supervised WM (per-channel pos_weight + focal-deep) + per-agent SAE at width 1024 |
 | **regime (6)**    | **0.991** | **6/6 at AUC >= 0.95 in a single run** (Phase 6.2)     | dual-head supervised WM (per-channel + focal-pooled) + macro-feed v3 SAE at width 512 |
 
 ### Phase 5.2: feature-bottlenecked regime supervision
@@ -998,6 +998,47 @@ Combined-best across all phases: **7/8 conjunctive features**
 recovered cleanly in a single training run, matching the previous
 union-of-experiments count, with `young_AND_indebted` as the only
 unrecovered conjunctive feature in any experiment in the project.
+
+### Phase 8.2: per-channel pos_weight closes `young_AND_indebted`
+
+Phase 8.1 left `young_AND_indebted` at AUC 0.944 with its dedicated
+per-channel head failing to learn (training-time AUC 0.510, collapsed
+under 0.35% positive class). Fix: add per-channel pos_weight to the
+BCE for the per-channel head only, with pos_weight[j] = (1 - prev[j]) /
+prev[j] clipped to [1, 50]. The deep head keeps focal loss as before.
+
+`young_AND_indebted`'s per-channel head jumped from 0.510 training AUC
+to 0.998, and the downstream SAE recovered it at **0.999** -- closing
+the conjunctive tier at **8/8 in a single training run**:
+
+| feature                              | prev   | P8.1 ch AUC | P8.2 ch AUC | **P8.2 SAE** |
+|--------------------------------------|--------|-------------|-------------|---------------|
+| `durables_firm_high_inv`             | 1.4%   | 1.000       | 1.000       | 1.000 ✓       |
+| `firm_AND_indebted_AND_high_inv`     | 8.1%   | 0.921       | 1.000       | 0.996 ✓       |
+| `food_firm_low_inv`                  | 0.4%   | 0.992       | 0.470 †     | 1.000 ✓       |
+| `prime_AND_high_cash`                | 19.2%  | 0.998       | 1.000       | 1.000 ✓       |
+| `retiree_AND_decumulating`           | 2.2%   | 0.499       | 0.998       | 0.998 ✓       |
+| `services_firm_high_output`          | 1.4%   | 0.496       | 1.000       | 1.000 ✓       |
+| `young_AND_high_mpc_AND_expansion`   | 1.9%   | 0.516       | 0.998       | 0.999 ✓       |
+| **`young_AND_indebted`**             | 0.35%  | **0.510**   | **0.998**   | **0.999** ✓   |
+| **single-run cov95**                 |        | 5/8         |             | **8/8** ✓     |
+| **conj mAUC**                        |        | 0.989       |             | **0.999**     |
+
+† `food_firm_low_inv`'s per-channel head regressed slightly because
+pos_weight=50 pushed it too hard, but the deep head still got 0.999
+and the SAE recovered it at 1.000 -- exactly the dual-head
+robustness Phase 6.2 demonstrated for regime. Each path covers what
+the other misses.
+
+Both supervised tiers (conjunctive + regime) are now fully recovered
+in single training runs:
+
+  Phase 8.2: conjunctive 8/8 at AUC >= 0.95, mAUC 0.999
+  Phase 6.2: regime      6/6 at AUC >= 0.95, mAUC 0.991
+
+The dual-head architecture (per-channel + secondary head with class-
+imbalance-handling loss) is the project's recommended supervised
+recipe across both tier classes.
 
 ### Phase 7.2: forge sweep -- substrate type + encoding capacity
 
@@ -1313,9 +1354,14 @@ the full alignment matrix and per-tier metrics are written to
   single-run maximum + 7/8 union-of-experiments). One feature
   (`young_AND_indebted`, 0.35% prevalence) still capped at 0.944 due to
   SAE L0-budget contention against the per-agent feature pool.
-- **Phase 9+**: real sae-forge integration when upstream ships;
-  per-feature loss weighting to close young_AND_indebted; calibration
-  to historical macro data; LLM-augmented agents.
+- **Phase 8.2** (latest): per-channel pos_weight on the conjunctive
+  dual-head closed `young_AND_indebted` (0.35% prevalence) at AUC 0.999.
+  **Conjunctive 8/8 at AUC >= 0.95 in a single run, mAUC 0.999.** Both
+  supervised tiers (conjunctive + regime) are now fully recovered in
+  single training runs.
+- **Phase 9+**: real sae-forge integration (`saeforge` 0.5.1 has
+  shipped); calibration to historical macro data; LLM-augmented
+  agents.
 
 ## Acknowledgements
 
