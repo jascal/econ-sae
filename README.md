@@ -741,7 +741,7 @@ compression objective can localize.
 |-------------------|-----------|--------------------------------------------------------|-------------------------------------------------------|
 | categorical (30)  | 1.000     | most at 1.000                                          | per-agent SAE on attention substrate                  |
 | bucketed (7)      | 0.928     | most 0.85-0.93                                         | per-agent SAE                                         |
-| conjunctive (8)   | 0.968     | 6/8 at AUC >= 0.95 (with I-O network + attention)      | per-agent SAE on Phase-3 substrate                    |
+| **conjunctive (8)** | **0.989** | **7/8 at AUC >= 0.95 in a single run** (Phase 8.1)   | dual-head supervised WM (per-channel + focal-deep) + per-agent SAE at width 1024 |
 | **regime (6)**    | **0.991** | **6/6 at AUC >= 0.95 in a single run** (Phase 6.2)     | dual-head supervised WM (per-channel + focal-pooled) + macro-feed v3 SAE at width 512 |
 
 ### Phase 5.2: feature-bottlenecked regime supervision
@@ -951,6 +951,53 @@ Output artifacts at
 - `sae.compressed.safetensors` (917 KB, the polygram-compressed SAE)
 - `sae.safetensors` (regeneratable, gitignored)
 - `validation_report.json` (2.4 MB raw pairwise stats, gitignored)
+
+### Phase 8.1: dual-head conjunctive supervision
+
+The Phase 6.2 dual-head recipe ports cleanly to the conjunctive tier
+with two adaptations: (a) labels are per-(period, agent) rather than
+per-period (every agent has its own conjunctive label vector), and
+(b) the "pooled" head becomes a per-(period, agent) deep head instead
+of an agent-pool, since conjunctive features inherently live at the
+agent level. Both heads get focal loss for class imbalance handling.
+
+Result: 7/8 conjunctive features cleanly recovered in a single
+training run; **conjunctive mAUC 0.989** (best ever, up from Phase 4.2's
+0.968). Previously, no single experiment got beyond 5/8 -- the 7/8
+result above required the union of Phase 1.6 (attn) + Phase 4.2
+(I-O network) -- so this is a meaningful single-run finding.
+
+| feature                              | prev   | best prior | **Phase 8.1**| status |
+|--------------------------------------|--------|------------|---------------|--------|
+| `durables_firm_high_inv`             | 1.4%   | 0.999      | 1.000         | ✓      |
+| `firm_AND_indebted_AND_high_inv`     | 8.1%   | 0.980      | 0.988         | ✓      |
+| `food_firm_low_inv`                  | 0.4%   | 0.999      | 1.000         | ✓      |
+| `prime_AND_high_cash`                | 19.2%  | 0.978      | **1.000**     | ✓ +0.02 |
+| `retiree_AND_decumulating`           | 2.2%   | 0.972      | **0.990**     | ✓ +0.02 |
+| `services_firm_high_output`          | 1.4%   | 1.000      | 0.999         | ✓      |
+| `young_AND_high_mpc_AND_expansion`   | 1.9%   | 0.970      | 0.992         | ✓      |
+| **`young_AND_indebted`**             | **0.35%**| 0.940    | **0.944**     | ✗      |
+| **single-run cov95**                 |        | 5/8        | **7/8**       | new max |
+
+The one remaining holdout, `young_AND_indebted`, has 0.35% prevalence
+-- four times rarer than the next-rarest conjunctive feature. The
+deep head's training-time AUC was **0.952** for this label, so the
+substrate did encode it. The SAE downstream got 0.944 -- the
+underlying signal is present, but L0-budget contention from the 30+
+other recoverable features in the per-agent vocabulary keeps it just
+under threshold.
+
+To cross 0.95 on this last feature would need either (a) per-feature
+loss-weight upgrade on the rare target, or (b) a wider SAE that can
+dedicate one feature to this rare label without competing for L0
+budget. The underlying recoverability ceiling for the substrate is
+clearly there (training-time channel AUC near-perfect on the deep
+head); the gap is at the SAE-allocation stage.
+
+Combined-best across all phases: **7/8 conjunctive features**
+recovered cleanly in a single training run, matching the previous
+union-of-experiments count, with `young_AND_indebted` as the only
+unrecovered conjunctive feature in any experiment in the project.
 
 ### Phase 7.2: forge sweep -- substrate type + encoding capacity
 
@@ -1261,9 +1308,14 @@ the full alignment matrix and per-tier metrics are written to
   sae-forge release. Polygram compressor on the Phase 6.2 SAE finds 6
   clusters in 128 dictionary slots -- direct evidence of supervised
   concept concentration.
-- **Phase 8+**: real sae-forge integration once the pluggable-Faithfulness
-  release ships; calibration to historical macro data; LLM-augmented
-  agents.
+- **Phase 8.1** (latest): dual-head conjunctive supervision. Conjunctive
+  mAUC 0.968 -> 0.989; **7/8 in a single run** (vs the prior 5/8
+  single-run maximum + 7/8 union-of-experiments). One feature
+  (`young_AND_indebted`, 0.35% prevalence) still capped at 0.944 due to
+  SAE L0-budget contention against the per-agent feature pool.
+- **Phase 9+**: real sae-forge integration when upstream ships;
+  per-feature loss weighting to close young_AND_indebted; calibration
+  to historical macro data; LLM-augmented agents.
 
 ## Acknowledgements
 
