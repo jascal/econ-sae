@@ -678,6 +678,73 @@ Best-in-class per-tier results across all experiments:
 | regime (6)        | 0.885     | 3/6 at AUC >= 0.95 (high_leverage, fiscal, monetary)   | per-period macro-feed SAE with ratio inputs           |
 | windowed regime   | 0.83-0.87 | (threshold ceiling -- not crossable by std SAE)        | needs supervised auxiliary or label re-engineering    |
 
+### Phase 5.1: regime-supervised TemporalWorldModel
+
+The Phase 4 ceiling on windowed-regime features
+(`phase:expansion`, `phase:contraction`, `phase:high_rate`) was
+diagnosed as a *supervised feature allocation* gap: the SAE could
+correlate with the underlying continuous signal at ~0.7 Pearson (AUC
+~0.87) but couldn't fire a clean step function at the label's
+threshold without targeted gradient pressure. Phase 5.1 tests the
+direct fix.
+
+We subclass `TemporalWorldModel` with a supervised regime head:
+
+```
+per-(period, agent) h1
+  -> mean-pool over agents  (B, T, h1_dim)
+  -> Linear                  (B, T, 6 regime logits)
+```
+
+trained with combined loss `L = MSE(state[t+1]) + 1.0 * BCE(regime_labels)`.
+After training, we run the standard macro-feed v3 SAE on the same h1
+substrate. The supervised gradient now actively pressures h1 to encode
+each regime label as a recoverable feature.
+
+| feature                 | Phase 4 best | **Phase 5.1** | change |
+|-------------------------|--------------|----------------|--------|
+| **`phase:high_rate`**   | 0.830        | **1.000**      | **+0.17** ✓ |
+| **`phase:high_leverage`**| 0.968       | **0.990**      | +0.02 ✓ |
+| `phase:fiscal_active`   | 1.000        | 1.000          | -- ✓   |
+| `phase:monetary_active` | 0.999        | 0.999          | -- ✓   |
+| `phase:expansion`       | 0.873        | **0.923**      | +0.05  |
+| `phase:contraction`     | 0.822        | **0.918**      | +0.10  |
+| **regime tier mAUC**    | 0.885        | **0.972**      | **+0.087** |
+| **regime cov95**        | 33%          | **67%** (4/6)  | **+34pp** |
+
+The supervised auxiliary head's own training-time AUC on its labels is
+0.96-1.000 across the board, confirming the substrate *can* encode the
+regime info. The downstream SAE recovers 4/6 labels cleanly and pushes
+the remaining 2 windowed-regime features into the 0.92 range -- a
+substantial jump from the 0.83 Phase 4 ceiling but still short of 0.95.
+
+The remaining gap is now subtler: the supervised gradient flows
+primarily into the `regime_head` linear weights, which pool h1 over
+agents. The substrate ends up encoding the regime info in a
+**distributed** way across many h1 components rather than allocating
+one clean feature per label. The SAE's L0-budget compression then has
+trouble localizing the distributed encoding into a single sparse
+feature for the two windowed-regime targets.
+
+Note: this experiment uses supervision at training time, which would
+not be available in a strict unsupervised-mechanistic-interpretability
+setting. It identifies the **theoretical recoverability ceiling** of
+each regime feature under the econ-sae benchmark rather than a
+production-realistic recipe. The lesson is general: SAE recovery isn't
+just substrate quality times decoder quality -- it's also about whether
+the substrate *allocates* its capacity in a way that the SAE's sparse
+compression objective can localize.
+
+### Updated final tier scoreboard
+
+| tier              | best mAUC | best feature recoveries                                | recipe                                                |
+|-------------------|-----------|--------------------------------------------------------|-------------------------------------------------------|
+| categorical (30)  | 1.000     | most at 1.000                                          | per-agent SAE on attention substrate                  |
+| bucketed (7)      | 0.928     | most 0.85-0.93                                         | per-agent SAE                                         |
+| conjunctive (8)   | 0.968     | 6/8 at AUC >= 0.95 (with I-O network + attention)      | per-agent SAE on Phase-3 substrate                    |
+| regime (6)        | **0.972** | **4/6 at AUC >= 0.95**, remaining 2 at 0.92            | per-period macro-feed v3 SAE on **regime-supervised** WM |
+| windowed regime   | 0.92      | (close, not crossing 0.95; distributed-encoding limit) | needs feature-bottlenecked supervision or specialized SAE |
+
 ## Why econ-sae is *harder* than sm-sae
 
 The Standard Model factorizes cleanly: every particle is a tensor product
@@ -890,10 +957,14 @@ the full alignment matrix and per-tier metrics are written to
   cross-sector cascades). Identified the genuine ceiling on the
   remaining 3 windowed-regime features: threshold-on-ratio recovery
   caps at AUC ~0.87 with the standard JumpReLU SAE.
-- **Phase 5**: supervised auxiliary regime head (the one fix that
-  should cross the threshold-on-ratio ceiling); calibration to
-  historical macro data; optional LLM-augmented agents; visualization
-  notebooks.
+- **Phase 5.1** (latest): supervised auxiliary regime head. Regime tier
+  mAUC jumped from 0.885 to 0.972 (+0.087, the biggest single phase
+  improvement). 4/6 regime features cleanly recovered; remaining 2 at
+  AUC 0.92 (close but not crossing 0.95 due to distributed-encoding
+  limitation of pooled supervision).
+- **Phase 5.2+**: feature-bottlenecked regime supervision (one-h1-feature-per-label
+  rather than pooled linear head); calibration to historical macro data;
+  optional LLM-augmented agents; visualization notebooks.
 
 ## Acknowledgements
 
