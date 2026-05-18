@@ -735,14 +735,14 @@ just substrate quality times decoder quality -- it's also about whether
 the substrate *allocates* its capacity in a way that the SAE's sparse
 compression objective can localize.
 
-### Updated final tier scoreboard (after Phase 5.2)
+### Updated final tier scoreboard (after Phase 6.2)
 
 | tier              | best mAUC | best feature recoveries                                | recipe                                                |
 |-------------------|-----------|--------------------------------------------------------|-------------------------------------------------------|
 | categorical (30)  | 1.000     | most at 1.000                                          | per-agent SAE on attention substrate                  |
 | bucketed (7)      | 0.928     | most 0.85-0.93                                         | per-agent SAE                                         |
 | conjunctive (8)   | 0.968     | 6/8 at AUC >= 0.95 (with I-O network + attention)      | per-agent SAE on Phase-3 substrate                    |
-| **regime (6)**    | **0.97+** | **6/6 at AUC >= 0.95** (union of Phase 5.1 + 5.2)      | macro-feed v3 SAE on supervised WM (per-channel for windowed; pooled for impulse) |
+| **regime (6)**    | **0.991** | **6/6 at AUC >= 0.95 in a single run** (Phase 6.2)     | dual-head supervised WM (per-channel + focal-pooled) + macro-feed v3 SAE at width 512 |
 
 ### Phase 5.2: feature-bottlenecked regime supervision
 
@@ -844,6 +844,57 @@ combination than pos_weight alone -- dual-head supervision (pooled +
 per-channel), focal loss instead of pos_weight, and/or a wider SAE
 that has room to allocate one feature per regime channel without
 competing for L0 budget with the macro feed's other 217 input dims.
+
+### Phase 6.2: dual-head + focal loss -- THE unified recipe
+
+Phase 6.2 implements the recipe Phase 6.1 pointed at:
+
+  1. **Dual supervision head**: both pooled BCE (Phase 5.1 style) and
+     per-channel BCE (Phase 5.2 style) trained simultaneously. The
+     pooled path handles impulse / current-state features; the per-
+     channel path handles windowed features. They cover different
+     feature classes; together they cover all of them.
+  2. **Focal loss** on the pooled head instead of pos_weight. Focal
+     down-weights well-classified examples specifically (focal_weight
+     = (1 - p_t)^gamma with gamma=2), so class imbalance is handled
+     smoothly without over-pumping rare classes.
+
+**Result: 6/6 regime features at AUC >= 0.95 in a single training run.**
+
+| feature                 | Phase 5.1  | Phase 5.2  | Phase 6.1 | **Phase 6.2** |
+|-------------------------|------------|------------|-----------|----------------|
+| `phase:contraction`     | 0.918      | 0.979 ✓    | 0.949     | **0.990** ✓   |
+| `phase:expansion`       | 0.923      | 0.967 ✓    | 0.955 ✓   | **0.994** ✓   |
+| `phase:fiscal_active`   | 1.000 ✓    | 0.999      | 1.000 ✓   | **1.000** ✓   |
+| `phase:high_leverage`   | 0.990 ✓    | 0.908      | 0.931     | **0.962** ✓   |
+| `phase:high_rate`       | 1.000 ✓    | 1.000 ✓    | 0.997 ✓   | **1.000** ✓   |
+| `phase:monetary_active` | 0.999 ✓    | 0.918      | 0.925     | **1.000** ✓   |
+| **single-run cov95**    | 4/6        | 4/6        | 3/6       | **6/6** ✓     |
+| **regime mAUC**         | 0.972      | 0.962      | 0.960     | **0.991**     |
+
+Why the dual head worked. Training-time AUCs from each head:
+
+```
+                         per-channel  pooled
+phase:contraction          0.998        0.998
+phase:expansion            0.998        0.998
+phase:fiscal_active        1.000        1.000
+phase:high_leverage        0.999        1.000
+phase:high_rate            1.000        1.000
+phase:monetary_active      0.684        0.963   <- pooled rescued this one
+```
+
+The per-channel path still fails on `phase:monetary_active` (rare class
+imbalance on a single h1 dim is hard regardless). But the parallel
+pooled head with focal loss handles class imbalance smoothly via the
+(1 - p_t)^gamma weight and reaches AUC 0.963. The downstream SAE
+recovers monetary_active via whichever path is stronger.
+
+**SAE width sweep finding**: 512 was the sweet spot, 1024 matched it,
+**2048 actually regressed to 4/6**. The wider SAE spreads its L0 budget
+too thin -- more features = each feature gets a smaller share of the
+active-feature pool. A useful negative result: bigger isn't always
+better for SAE feature allocation.
 
 ## Why econ-sae is *harder* than sm-sae
 
@@ -1079,15 +1130,17 @@ the full alignment matrix and per-tier metrics are written to
 - **HTML walkthrough** (`scripts/visualize.py`, mirroring sm-sae's
   `runs/visualize.html`). Single-file self-contained report; 6 sections;
   reads from on-disk experiment summaries.
-- **Phase 6.1** (latest): per-channel BCE + pos_weight. Solved the
-  rare-channel training failure (fiscal channel 0.50 -> 1.00 training
-  AUC) but the rebalanced loss stole capacity from windowed features in
-  the downstream SAE -- 3/6 in a single run, vs 4/6 for Phase 5.1 or
-  5.2 individually. Union across 5.1+5.2+6.1 remains 6/6.
-- **Phase 6.2+**: true unified recipe via dual-head supervision (pooled +
-  per-channel) + focal loss + wider SAE; SAE-Forge integration (hold
-  until sae-forge is solid in sm-sae); calibration to historical macro
-  data; LLM-augmented agents.
+- **Phase 6.1**: per-channel BCE + pos_weight. Solved the rare-channel
+  training failure but the rebalanced loss stole SAE capacity from
+  windowed features -- 3/6 in a single run.
+- **Phase 6.2** (latest): dual-head (per-channel + pooled-with-focal-loss).
+  **6/6 regime features at AUC >= 0.95 in a single training run, the
+  first unified recipe in the project.** Regime mAUC 0.991 (best ever).
+  Width 512 is the sweet spot; 2048 regressed because L0 budget spreads
+  too thin.
+- **Phase 7+**: SAE-Forge integration (hold until sm-sae's is solid);
+  calibration to historical macro data; LLM-augmented agents;
+  visualization notebooks for the multi-decoder recipe.
 
 ## Acknowledgements
 
