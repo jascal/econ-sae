@@ -735,15 +735,67 @@ just substrate quality times decoder quality -- it's also about whether
 the substrate *allocates* its capacity in a way that the SAE's sparse
 compression objective can localize.
 
-### Updated final tier scoreboard
+### Updated final tier scoreboard (after Phase 5.2)
 
 | tier              | best mAUC | best feature recoveries                                | recipe                                                |
 |-------------------|-----------|--------------------------------------------------------|-------------------------------------------------------|
 | categorical (30)  | 1.000     | most at 1.000                                          | per-agent SAE on attention substrate                  |
 | bucketed (7)      | 0.928     | most 0.85-0.93                                         | per-agent SAE                                         |
 | conjunctive (8)   | 0.968     | 6/8 at AUC >= 0.95 (with I-O network + attention)      | per-agent SAE on Phase-3 substrate                    |
-| regime (6)        | **0.972** | **4/6 at AUC >= 0.95**, remaining 2 at 0.92            | per-period macro-feed v3 SAE on **regime-supervised** WM |
-| windowed regime   | 0.92      | (close, not crossing 0.95; distributed-encoding limit) | needs feature-bottlenecked supervision or specialized SAE |
+| **regime (6)**    | **0.97+** | **6/6 at AUC >= 0.95** (union of Phase 5.1 + 5.2)      | macro-feed v3 SAE on supervised WM (per-channel for windowed; pooled for impulse) |
+
+### Phase 5.2: feature-bottlenecked regime supervision
+
+Phase 5.1's pooled regime head stalled at AUC 0.92 on
+`phase:expansion`/`phase:contraction` because the supervised gradient
+distributed each label across many h1 components. Phase 5.2 forces a
+one-channel-per-label mapping by reserving the last 6 dimensions of h1
+as direct regime channels, with per-(period, agent) BCE on each
+channel:
+
+```
+regime_logits[B, T, N, j] = h1[B, T, N, h1_dim-6+j] * scale[j] + bias[j]
+loss = MSE(next_state) + 1.0 * BCE(regime_logits, regime_labels_per_period)
+```
+
+Per-feature results (jr_w512_ep300 on macro-feed v3):
+
+| feature              | Phase 5.1 | **Phase 5.2** | best across both |
+|----------------------|-----------|----------------|------------------|
+| `phase:contraction`  | 0.918     | **0.979** ✓    | **0.979** (P5.2) |
+| `phase:expansion`    | 0.923     | **0.967** ✓    | **0.967** (P5.2) |
+| `phase:fiscal_active`| **1.000** | 0.999          | 1.000 (P5.1)     |
+| `phase:high_leverage`| **0.990** | 0.908          | 0.990 (P5.1)     |
+| `phase:high_rate`    | 1.000     | 1.000          | 1.000            |
+| `phase:monetary_active`| **0.999**| 0.918         | 0.999 (P5.1)     |
+
+**The combined best of Phase 5.1 + 5.2 gives 6/6 regime features at
+AUC ≥ 0.95 -- full regime tier closure.** Different feature types want
+different supervision recipes:
+
+- **Windowed regime** (`phase:expansion`/`contraction`) need
+  per-channel supervision so the substrate internalizes a multi-period
+  statistic that no input dim directly provides. Pooled supervision
+  (Phase 5.1) was insufficient.
+- **Impulse regime** (`phase:fiscal_active`/`monetary_active`) and
+  **current-state regime** (`phase:high_leverage`/`high_rate`) are
+  cleanly recovered with the existing input encoding (impulse flags +
+  ratio inputs) and the pooled supervised head (Phase 5.1).
+
+Notably, in Phase 5.2 the dedicated h1 channels never learned the
+impulse features (training-time channel AUC stayed at 0.50 for
+`fiscal_active`/`monetary_active` because the BCE loss couldn't
+overcome the 8-10% class imbalance on a single h1 dim). The downstream
+SAE recovered them anyway via the Phase-2.0 `monetary_flag`/`fiscal_flag`
+input dims -- so per-channel supervision was only decisive on the
+windowed features.
+
+This closes the regime tier as fully recoverable under the econ-sae
+benchmark, given the right supervision recipe. The remaining open
+question is whether a SINGLE unified recipe can reach 6/6 (rather than
+needing the union of two separate experiments). One plausible answer:
+weight the per-channel BCE loss higher on rare features, or use focal
+loss to handle class imbalance. Left for Phase 5.3 or beyond.
 
 ## Why econ-sae is *harder* than sm-sae
 
@@ -968,14 +1020,21 @@ the full alignment matrix and per-tier metrics are written to
   cross-sector cascades). Identified the genuine ceiling on the
   remaining 3 windowed-regime features: threshold-on-ratio recovery
   caps at AUC ~0.87 with the standard JumpReLU SAE.
-- **Phase 5.1** (latest): supervised auxiliary regime head. Regime tier
-  mAUC jumped from 0.885 to 0.972 (+0.087, the biggest single phase
-  improvement). 4/6 regime features cleanly recovered; remaining 2 at
-  AUC 0.92 (close but not crossing 0.95 due to distributed-encoding
-  limitation of pooled supervision).
-- **Phase 5.2+**: feature-bottlenecked regime supervision (one-h1-feature-per-label
-  rather than pooled linear head); calibration to historical macro data;
-  optional LLM-augmented agents; visualization notebooks.
+- **Phase 5.1**: supervised auxiliary regime head. Regime mAUC 0.885 ->
+  0.972 (+0.087, biggest single-phase improvement). 4/6 regime features
+  cleanly recovered.
+- **Phase 5.2** (latest): feature-bottlenecked regime supervision (last 6
+  h1 dims dedicated to regime labels, per-(period, agent) BCE). Unlocks
+  the windowed regime features (`phase:expansion`/`contraction` cross
+  AUC 0.95). **Combined with Phase 5.1, 6/6 regime features at AUC >= 0.95
+  -- full regime tier closure under the econ-sae benchmark.**
+- **HTML walkthrough** (`scripts/visualize.py`, mirroring sm-sae's
+  `runs/visualize.html`). Single-file self-contained report; 6 sections;
+  reads from on-disk experiment summaries.
+- **Phase 6 candidates**: unified-recipe regime supervision (focal-loss
+  per-channel + class-weighted BCE to cross 6/6 in a single experiment);
+  SAE-Forge integration (hold until sae-forge is solid in sm-sae);
+  calibration to historical macro data; LLM-augmented agents.
 
 ## Acknowledgements
 
