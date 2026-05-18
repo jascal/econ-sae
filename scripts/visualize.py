@@ -17,8 +17,10 @@ Inputs read (any missing piece is reported in-place, not fatal):
         gated_sae, regime_supervised}/*_summary.json  -- built by experiment scripts
   runs/polygram/polygram_summary.json                 -- built by scripts/polygram_demo.py
 
-Output: a self-contained HTML file (default runs/visualize.html); all
-plots inlined as base64 PNGs, so the result is one shareable artifact.
+Output: a self-contained HTML file (default docs/index.html, so the
+report is directly servable via GitHub Pages with Source = /docs);
+all plots inlined as base64 PNGs, so the result is one shareable
+artifact.
 
     python scripts/visualize.py [--out path]
 
@@ -795,7 +797,9 @@ nav a { margin-right: 1rem; color: #224; }
 # ---------------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--out", default=os.path.join(REPO_ROOT, "runs", "visualize.html"))
+    # Default output is docs/index.html so the report can be served directly
+    # via GitHub Pages (Settings -> Pages -> Branch=main, folder=/docs).
+    ap.add_argument("--out", default=os.path.join(REPO_ROOT, "docs", "index.html"))
     args = ap.parse_args()
 
     print(f"Building report -> {args.out}")

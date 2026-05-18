@@ -1057,16 +1057,25 @@ python scripts/train_all.py            # ~15min: trains 9 SAEs (3 variants x 3 f
 python scripts/evaluate.py             # ~30s: AUC alignment + per-tier table
 ```
 
-Generate the HTML walkthrough (sibling to sm-sae's `runs/visualize.html`):
+Generate the HTML walkthrough (sibling to sm-sae's
+`runs/visualize.html`):
 
 ```bash
 pip install -e ".[viz]"                # one-time, brings in matplotlib
-python scripts/visualize.py            # writes runs/visualize.html (self-contained)
+python scripts/visualize.py            # writes docs/index.html (self-contained)
 ```
 
 The HTML is single-file (~300 KB) with inlined PNG plots, mirroring
 sm-sae's reporting style. Six sections: substrate, simulator, SAE,
 polygram, scoreboard, phase journey.
+
+**Published version**: with GitHub Pages enabled (Settings → Pages →
+Source = `Deploy from a branch`, Branch = `main`, Folder = `/docs`),
+the report is live at:
+
+  → **https://jascal.github.io/econ-sae/**
+
+Pages auto-republishes on every push that touches `docs/`.
 
 Per-(feed, variant) checkpoints land in `runs/{feed}__{variant}.pt`;
 the full alignment matrix and per-tier metrics are written to

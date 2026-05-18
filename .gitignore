@@ -34,9 +34,8 @@ ENV/
 # Ignore everything at runs/ level
 runs/*
 
-# Re-include small summaries + rendered HTML for direct sharing
+# Re-include small summaries for direct readability on GitHub
 !runs/*_summary.json
-!runs/visualize.html
 
 # Re-include the Phase 6.2 unified-recipe artifacts: the headline
 # "6/6 regime in a single run" result. World-model + 3 SAE checkpoints
