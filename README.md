@@ -793,9 +793,57 @@ windowed features.
 This closes the regime tier as fully recoverable under the econ-sae
 benchmark, given the right supervision recipe. The remaining open
 question is whether a SINGLE unified recipe can reach 6/6 (rather than
-needing the union of two separate experiments). One plausible answer:
-weight the per-channel BCE loss higher on rare features, or use focal
-loss to handle class imbalance. Left for Phase 5.3 or beyond.
+needing the union of two separate experiments). Phase 6.1 below tests
+the simplest unified recipe.
+
+### Phase 6.1: per-channel BCE with class-balanced pos_weight
+
+The Phase 5.2 rare-channel failure was diagnosed as a class-imbalance
+issue: BCE on a single h1 dim couldn't overcome the 8-10% positive
+class prevalence of the impulse features, so those channels collapsed
+to "always predict 0". The textbook fix is `pos_weight` in
+BCEWithLogitsLoss: each positive example contributes `pos_weight[j]`
+times the loss of a negative example. Setting
+`pos_weight[j] = (1 - prev[j]) / prev[j]` balances the gradient signal
+across the prevalence axis.
+
+Per-channel training-time AUCs (probability vs label after period-mean
+pooling):
+
+| label                   | prev   | pos_weight | Phase 5.2  | **Phase 6.1** |
+|-------------------------|--------|------------|------------|----------------|
+| `phase:contraction`     | 0.30   | 2.35       | 0.994      | 0.998          |
+| `phase:expansion`       | 0.25   | 3.05       | 0.997      | 0.999          |
+| **`phase:fiscal_active`** | 0.08 | **11.36**  | **0.500**  | **1.000** ✓ pos_weight worked  |
+| `phase:high_leverage`   | 0.53   | 1.00       | 1.000      | 0.999          |
+| `phase:high_rate`       | 0.22   | 3.52       | 1.000      | 1.000          |
+| `phase:monetary_active` | 0.10   | 8.73       | 0.496      | 0.696 (partial) |
+
+The pos_weight fix solved the fiscal-channel training problem (0.50 ->
+1.00 training AUC) and partially helped monetary (0.50 -> 0.70). But
+the rebalanced loss stole SAE-allocation capacity from the windowed
+features in the downstream macro-feed v3 SAE:
+
+| feature                 | P 5.1  | P 5.2     | **P 6.1**  | best across all three |
+|-------------------------|--------|-----------|------------|------------------------|
+| `phase:contraction`     | 0.918  | **0.979** | 0.949      | 0.979 (5.2)            |
+| `phase:expansion`       | 0.923  | **0.967** | 0.955 ✓    | 0.967 (5.2)            |
+| `phase:fiscal_active`   | **1.000** ✓ | 0.999 | 1.000 ✓ | 1.000                  |
+| `phase:high_leverage`   | **0.990** ✓ | 0.908 | 0.931  | 0.990 (5.1)            |
+| `phase:high_rate`       | 1.000 ✓ | 1.000 ✓ | 0.997 ✓   | 1.000                  |
+| `phase:monetary_active` | **0.999** ✓ | 0.918 | 0.925  | 0.999 (5.1)            |
+| **cov95 (single run)**  | 4/6    | 4/6       | 3/6        | **6/6 (union)**        |
+
+Phase 6.1 lands at 3/6 in a single run, vs Phase 5.1's 4/6 and Phase 5.2's
+4/6. Pos_weight is a *partial* unifier: it makes rare channels train, but
+the rebalancing steals capacity from windowed-feature SAE features. The
+union across 5.1 + 5.2 + 6.1 remains the only documented path to 6/6.
+
+The honest read: a single unified recipe likely needs a richer
+combination than pos_weight alone -- dual-head supervision (pooled +
+per-channel), focal loss instead of pos_weight, and/or a wider SAE
+that has room to allocate one feature per regime channel without
+competing for L0 budget with the macro feed's other 217 input dims.
 
 ## Why econ-sae is *harder* than sm-sae
 
@@ -1031,10 +1079,15 @@ the full alignment matrix and per-tier metrics are written to
 - **HTML walkthrough** (`scripts/visualize.py`, mirroring sm-sae's
   `runs/visualize.html`). Single-file self-contained report; 6 sections;
   reads from on-disk experiment summaries.
-- **Phase 6 candidates**: unified-recipe regime supervision (focal-loss
-  per-channel + class-weighted BCE to cross 6/6 in a single experiment);
-  SAE-Forge integration (hold until sae-forge is solid in sm-sae);
-  calibration to historical macro data; LLM-augmented agents.
+- **Phase 6.1** (latest): per-channel BCE + pos_weight. Solved the
+  rare-channel training failure (fiscal channel 0.50 -> 1.00 training
+  AUC) but the rebalanced loss stole capacity from windowed features in
+  the downstream SAE -- 3/6 in a single run, vs 4/6 for Phase 5.1 or
+  5.2 individually. Union across 5.1+5.2+6.1 remains 6/6.
+- **Phase 6.2+**: true unified recipe via dual-head supervision (pooled +
+  per-channel) + focal loss + wider SAE; SAE-Forge integration (hold
+  until sae-forge is solid in sm-sae); calibration to historical macro
+  data; LLM-augmented agents.
 
 ## Acknowledgements
 
