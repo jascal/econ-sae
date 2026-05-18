@@ -56,7 +56,7 @@ import torch
 
 from econsae.sae.forge_bridge import (
     SELECTORS, build_dictionary, build_records, compress, convert_to_safetensors,
-    forge_stub, load_sae, score_against_gt, synthesize_validation_report,
+    forge_evaluate, load_sae, score_against_gt, synthesize_validation_report,
     write_report,
 )
 
@@ -247,10 +247,22 @@ def main():
         comp_summary = {"error": f"{type(e).__name__}: {e}"}
         print(f"      Compressor failed: {comp_summary['error']}")
 
-    # Stage 7 (stub)
-    print(f"  [7] forge into host model  ...")
-    forge_summary = forge_stub(compressed_path, sae, feed, run_dir)
+    # Stage 7: saeforge basis projection + GT eval (full forge into a
+    # transformer host is a category mismatch for our custom WM)
+    print(f"  [7] saeforge basis evaluation  ...")
+    forge_summary = forge_evaluate(compressed_path, sae, feed, run_dir)
     print(f"      status={forge_summary['status']}")
+    if forge_summary["status"] == "ok":
+        b = forge_summary["basis"]
+        print(f"      basis: n_features={b['n_features']}  "
+              f"d_model={b['d_model']}  "
+              f"scale_compression_ratio={b['scale_compression_ratio']:.3f}")
+        k = forge_summary["gt_kept_subspace"]
+        f = forge_summary["gt_full_subspace"]
+        print(f"      kept-subspace mAUC={k['mean_best_auc']:.3f}  "
+              f"cov95={k['coverage_0.95']:.1%}  "
+              f"(full SAE mAUC={f['mean_best_auc']:.3f}, "
+              f"delta={forge_summary['delta_mAUC']:+.3f})")
 
     # Stage 8
     print(f"  [8] score original SAE activations against GT")

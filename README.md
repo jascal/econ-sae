@@ -1092,6 +1092,46 @@ python scripts/forge_pipeline.py --sae-ckpt runs/regime_dual_head_experiment/jr_
     --feed-type macro --encoding rung3
 ```
 
+### Phase 9.1: real saeforge integration
+
+`saeforge 0.5.1` shipped with `FeatureBasis.from_polygram_checkpoint`,
+`SubspaceProjector`, and `GroundTruthTarget` -- exactly the pieces
+needed to evaluate polygram-compressed SAEs end-to-end. Phase 9.1
+fleshes out `scripts/forge_pipeline.py` stage 7 with a real saeforge
+call:
+
+  1. `compress()` now writes a companion `*_compression_report.json`
+     next to the compressed safetensors (the file saeforge's
+     `from_polygram_checkpoint` auto-locates).
+  2. `forge_evaluate()` loads the compressed basis as a saeforge
+     `FeatureBasis`, builds a `SubspaceProjector`, projects the
+     original SAE activations onto the kept-feature subspace, and
+     scores the projected activations against the GT label matrix
+     via the same AUC-based metric used elsewhere in the project.
+
+Result on the Phase 6.2 dual-head SAE:
+
+```
+basis: n_features=424  d_model=223  scale_compression_ratio=1.000
+kept-subspace mAUC=0.734  cov95=33.3%   (full SAE mAUC=0.734, delta=-0.000)
+```
+
+**Polygram-compressed kept-subspace mAUC is identical to the full SAE
+mAUC.** The 88 features polygram zeroed during compression were
+genuinely redundant -- removing them lost zero GT-recoverable
+structure. This is the validation that polygram's `merge` strategy
+preserves interpretability: compression is lossless at the GT-AUC
+metric.
+
+What's NOT integrated: full `ForgePipeline.run_synthetic` requires a
+custom `WorldModel` adapter (saeforge.adapters.base.ArchitectureAdapter)
+for the host architecture. saeforge 0.5.1 ships adapters for
+transformer LLMs (gpt2 / llama / gemma / qwen / whisper) -- none of
+which match econ-sae's TemporalWorldModel (attention + GRU + MLP).
+Writing a custom adapter for our architecture is a Phase 9.2 project;
+the projection + faithfulness eval implemented here is the meaningful
+subset for our use case.
+
 ## Why econ-sae is *harder* than sm-sae
 
 The Standard Model factorizes cleanly: every particle is a tensor product
@@ -1359,9 +1399,16 @@ the full alignment matrix and per-tier metrics are written to
   **Conjunctive 8/8 at AUC >= 0.95 in a single run, mAUC 0.999.** Both
   supervised tiers (conjunctive + regime) are now fully recovered in
   single training runs.
-- **Phase 9+**: real sae-forge integration (`saeforge` 0.5.1 has
-  shipped); calibration to historical macro data; LLM-augmented
-  agents.
+- **Phase 9.1** (latest): real saeforge integration in stage 7 of the
+  forge pipeline. `FeatureBasis.from_polygram_checkpoint` +
+  `SubspaceProjector` + GT-AUC eval. Validation finding: polygram's
+  compression (Phase 6.2 SAE, removed 88 features as redundant)
+  preserves GT-recoverable structure exactly -- kept-subspace mAUC
+  matches the full-SAE mAUC at 0.734, delta = 0.000.
+- **Phase 9.2+**: custom `WorldModel` adapter for econ-sae's
+  TemporalWorldModel so `ForgePipeline.run_synthetic` can fine-tune
+  into a host architecture; calibration to historical macro data;
+  LLM-augmented agents.
 
 ## Acknowledgements
 
