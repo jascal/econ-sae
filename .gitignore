@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual envs
+.venv/
+venv/
+ENV/
+
+# Editor / IDE
+.vscode/
+.idea/
+.DS_Store
+.claude/
+
+# Project artifacts (generated)
+runs/
+*.pt
+*.ckpt
+
+# Generated data bundles -- checked in by default so the repo is usable
+# without running scripts/build_data.py first. Comment these in to track
+# only the build scripts:
+# data/*.npz
+# data/*.safetensors
+
+# OS junk
+Thumbs.db
+*.swp

@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "econ-sae"
+version = "0.0.1"
+description = "A stock-flow-consistent macroeconomy as a tensor bundle, used as ground-truth substrate for SAE interpretability research."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Allan Scott" }]
+keywords = ["sparse-autoencoder", "interpretability", "macroeconomics", "agent-based-model", "stock-flow-consistent", "polygram"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+  "numpy>=1.24,<2",
+  "torch>=2.0",
+  "safetensors>=0.4",
+]
+
+[project.optional-dependencies]
+polygram = [
+  "polygram @ git+https://github.com/jascal/polygram.git",
+]
+viz = [
+  "matplotlib>=3.7",
+]
+dev = [
+  "pytest>=7",
+  "pytest-cov>=4",
+]
+intel = [
+  "torch==2.2.2",
+  "numpy<2",
+]
+
+[project.scripts]
+econ-sae-build-data    = "scripts.build_data:main"
+econ-sae-train-all     = "scripts.train_all:main"
+econ-sae-evaluate      = "scripts.evaluate:main"
+econ-sae-polygram-demo = "scripts.polygram_demo:main"
+
+[project.urls]
+Homepage = "https://github.com/jascal/econ-sae"
+
+[tool.setuptools]
+packages = ["econsae", "econsae.simulator", "econsae.sae"]
+
+[tool.setuptools.package-data]
+econsae = ["py.typed"]
