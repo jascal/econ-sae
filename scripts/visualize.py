@@ -38,6 +38,8 @@ import sys
 import traceback
 from html import escape
 
+from econsae.polygram_bridge import efficiency_for_display
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 os.chdir(REPO_ROOT)
@@ -568,15 +570,7 @@ def section_polygram() -> str:
                 f"{escape(r['error'][:60])}</td></tr>"
             )
             continue
-        # at_structural_floor is written by econsae.polygram_bridge when run
-        # against polygram v0.11+. Older JSON without the field falls back
-        # to the legacy is-None check.
-        at_floor = r.get("at_structural_floor", False)
-        eff = (
-            "N/A"
-            if (r["cancellation_efficiency"] is None or at_floor)
-            else f"{r['cancellation_efficiency']:.1%}"
-        )
+        eff = efficiency_for_display(r, fmt=".1%")
         canc_rows.append(
             f"<tr><td><code>{escape(r['label'])}</code></td>"
             f"<td>{escape(' / '.join(r['pair']))}</td>"
