@@ -1,4 +1,9 @@
-"""Phase 9.2: saeforge ArchitectureAdapter for TemporalWorldModel.
+"""Phase 9.2 + 9.3: saeforge ArchitectureAdapters for econ-sae hosts.
+
+Two adapters share the same fc1-bridge projection algebra: one for
+`TemporalWorldModel` / `DualHeadRegimeWM` (with the cross-period GRU),
+and one for `AttnWorldModel` (Phase 1.6 architecture, no GRU, per-period
+input of shape `(B, N, in_dim)`).
 
 Lets `saeforge.ForgePipeline.run_synthetic` forge an econ-sae host model
 end-to-end. The SAE substrate sits at a single point in the network
@@ -38,6 +43,7 @@ from saeforge.adapters.base import ArchitectureAdapter, to_numpy
 
 
 FAMILY = "econsae_temporal_wm"
+FAMILY_ATTN = "econsae_attn_wm"
 
 
 # ---------------------------------------------------------------------------
@@ -307,22 +313,180 @@ class NextStateMSE:
 
 
 # ---------------------------------------------------------------------------
+# Phase 9.3: AttnWorldModel adapter
+#
+# AttnWorldModel is the GRU-less ancestor of TemporalWorldModel: same
+# input_proj → attn+norm → fc1 → fc2 → fc3 pipeline, but per-period input
+# of shape (B, N, in_dim) instead of (B, T, N, in_dim). The fc1-bridge
+# projection algebra is identical to TemporalWMAdapter's; only the forward
+# pass and the absence of GRU parameters differ.
+
+@dataclass
+class AttnWMNativeConfig:
+    family: str = FAMILY_ATTN
+    n_features: int = 0
+    agent_dim: int = 17
+    macro_dim: int = 10
+    shock_dim: int = 10
+    embed_dim: int = 64
+    n_heads: int = 4
+    n_attn_layers: int = 1
+    h2_dim: int = 128
+    tied_embeddings: bool = False
+    rope_mode: str = "standard"
+    forward_mode: str = "native_in_basis"
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, payload: dict) -> "AttnWMNativeConfig":
+        return cls(**payload)
+
+
+class ForgedAttnWorldModel(nn.Module):
+    """AttnWorldModel with `h1` in basis coordinates."""
+
+    def __init__(self, config: AttnWMNativeConfig):
+        super().__init__()
+        self.config = config
+        in_dim = config.agent_dim + config.macro_dim + config.shock_dim
+
+        self.input_proj = nn.Linear(in_dim, config.embed_dim)
+        self.attn_layers = nn.ModuleList([
+            nn.MultiheadAttention(config.embed_dim, config.n_heads, batch_first=True)
+            for _ in range(config.n_attn_layers)
+        ])
+        self.attn_norms = nn.ModuleList([
+            nn.LayerNorm(config.embed_dim) for _ in range(config.n_attn_layers)
+        ])
+        # Bridge: fc1 reads embed_dim (not gru_hidden) because no GRU.
+        self.fc1 = nn.Linear(config.embed_dim, config.n_features)
+        self.fc2 = nn.Linear(config.n_features, config.h2_dim)
+        self.fc3 = nn.Linear(config.h2_dim, config.agent_dim)
+
+        self.register_buffer("x_mean", torch.zeros(in_dim))
+        self.register_buffer("x_std", torch.ones(in_dim))
+        self.register_buffer("y_mean", torch.zeros(config.agent_dim))
+        self.register_buffer("y_std", torch.ones(config.agent_dim))
+
+    def forward(self, x: torch.Tensor, return_h1: bool = False):
+        # x: (B, N, in_dim) -- normalised input, no time axis
+        h = self.input_proj(x)
+        for attn, norm in zip(self.attn_layers, self.attn_norms):
+            attended, _ = attn(h, h, h, need_weights=False)
+            h = norm(h + attended)
+        h1 = F.relu(self.fc1(h))
+        h2 = F.relu(self.fc2(h1))
+        out = self.fc3(h2)
+        if return_h1:
+            return out, h1
+        return out
+
+
+class AttnWMAdapter(ArchitectureAdapter):
+    """ArchitectureAdapter for econ-sae's AttnWorldModel hosts."""
+
+    family = FAMILY_ATTN
+
+    def walk(self, host: Any, projector, *, attention_width: str = "host"
+             ) -> dict[str, np.ndarray]:
+        if attention_width != "host":
+            raise ValueError(
+                f"AttnWMAdapter supports attention_width='host' only; "
+                f"got {attention_width!r}"
+            )
+        sb = float(projector.scale_boost)
+        W_dec = projector.basis.W_dec
+        E = projector.basis.pseudoinverse()
+
+        out: dict[str, np.ndarray] = {}
+        out["input_proj.weight"] = to_numpy(host.input_proj.weight)
+        out["input_proj.bias"] = to_numpy(host.input_proj.bias)
+        for i, (attn, norm) in enumerate(zip(host.attn_layers, host.attn_norms)):
+            out[f"attn_layers.{i}.in_proj_weight"] = to_numpy(attn.in_proj_weight)
+            out[f"attn_layers.{i}.in_proj_bias"] = to_numpy(attn.in_proj_bias)
+            out[f"attn_layers.{i}.out_proj.weight"] = to_numpy(attn.out_proj.weight)
+            out[f"attn_layers.{i}.out_proj.bias"] = to_numpy(attn.out_proj.bias)
+            out[f"attn_norms.{i}.weight"] = to_numpy(norm.weight)
+            out[f"attn_norms.{i}.bias"] = to_numpy(norm.bias)
+
+        # fc1 / fc2 projection — identical algebra to TemporalWMAdapter.
+        fc1_w = to_numpy(host.fc1.weight)
+        fc1_b = to_numpy(host.fc1.bias)
+        fc2_w = to_numpy(host.fc2.weight)
+        fc2_b = to_numpy(host.fc2.bias)
+        out["fc1.weight"] = sb * (E.T @ fc1_w)
+        out["fc1.bias"] = sb * (E.T @ fc1_b)
+        out["fc2.weight"] = fc2_w @ W_dec.T / sb
+        out["fc2.bias"] = fc2_b.copy()
+
+        out["fc3.weight"] = to_numpy(host.fc3.weight)
+        out["fc3.bias"] = to_numpy(host.fc3.bias)
+        out["x_mean"] = to_numpy(host.x_mean)
+        out["x_std"] = to_numpy(host.x_std)
+        out["y_mean"] = to_numpy(host.y_mean)
+        out["y_std"] = to_numpy(host.y_std)
+        return out
+
+    def build_native_config(self, host: Any, n_features: int,
+                            *, attention_width: str = "host"
+                            ) -> AttnWMNativeConfig:
+        if attention_width != "host":
+            raise ValueError(
+                f"AttnWMAdapter supports attention_width='host' only; "
+                f"got {attention_width!r}"
+            )
+        return AttnWMNativeConfig(
+            family=self.family,
+            n_features=int(n_features),
+            agent_dim=int(host.agent_dim),
+            macro_dim=int(host.macro_dim),
+            shock_dim=int(host.shock_dim),
+            embed_dim=int(host.embed_dim),
+            n_heads=int(host.n_heads),
+            n_attn_layers=int(host.n_attn_layers),
+            h2_dim=int(host.h2_dim),
+        )
+
+    def native_module_class(self) -> type:
+        return ForgedAttnWorldModel
+
+    def default_faithfulness_target(self):
+        return AttnNextStateMSE()
+
+
+class AttnNextStateMSE(NextStateMSE):
+    """MSE faithfulness for AttnWorldModel hosts.
+
+    Identical to `NextStateMSE` except the expected input shape is
+    `(B, N, in_dim)` -- AttnWorldModel has no time axis. The base class's
+    `score()` is shape-agnostic (it just forwards both models on `x` and
+    takes MSE), so we only override `name` to distinguish in JSON
+    summaries.
+    """
+
+    name = "attn_next_state_mse"
+
+
+# ---------------------------------------------------------------------------
 # Registration at module import time. DualHeadRegimeWM lives under
 # `scripts/` — import lazily so this module remains importable even when
 # the scripts package can't load (the registry simply lacks the
 # subclass entry in that case).
 
 def _register() -> None:
-    from econsae.sae.world_model import TemporalWorldModel
+    from econsae.sae.world_model import AttnWorldModel, TemporalWorldModel
 
-    adapter = TemporalWMAdapter()
+    temporal_adapter = TemporalWMAdapter()
     # More-specific subclass first so first-match-wins dispatch keeps it.
     try:
         from scripts.regime_dual_head_experiment import DualHeadRegimeWM
-        register_adapter(DualHeadRegimeWM, adapter)
+        register_adapter(DualHeadRegimeWM, temporal_adapter)
     except ImportError:
         pass
-    register_adapter(TemporalWorldModel, adapter)
+    register_adapter(TemporalWorldModel, temporal_adapter)
+    register_adapter(AttnWorldModel, AttnWMAdapter())
 
 
 _register()

@@ -387,6 +387,8 @@ def forge_synthetic(
     host,
     x_eval: torch.Tensor,
     run_dir: str,
+    *,
+    scale_boost: float | str = "auto",
 ) -> dict:
     """Run saeforge's `ForgePipeline.run_synthetic` against a TemporalWM host.
 
@@ -437,7 +439,7 @@ def forge_synthetic(
         )
         return out
 
-    projector = SubspaceProjector(basis=basis)
+    projector = SubspaceProjector(basis=basis, scale_boost=scale_boost)
     pipeline = ForgePipeline(
         basis=basis, projector=projector,
         faithfulness=NextStateMSE(),
@@ -463,6 +465,7 @@ def forge_synthetic(
             "d_model": int(basis.d_model),
             "scale_compression_ratio": float(basis.scale_compression_ratio),
         },
+        "scale_boost": float(projector.scale_boost),
         "next_state_mse": float(result.faithfulness),
         "faithfulness_target": result.faithfulness_target_name,
         "n_params_forged": int(result.n_params),

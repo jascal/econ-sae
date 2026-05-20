@@ -1432,9 +1432,33 @@ the full alignment matrix and per-tier metrics are written to
   acts SAE in 9.2 -- the supervised representation forges more
   faithfully), kept-subspace mAUC 0.804 with delta = -0.001 vs full
   SAE. New `acts_dual_head` feed type in `scripts/forge_pipeline.py`.
-- **Phase 9.3+**: AttnWorldModel adapter (the remaining feed type);
-  scale-boost calibration for over-complete bases; calibration to
-  historical macro data; LLM-augmented agents.
+- **Phase 9.3** (latest): `AttnWMAdapter` (Phase 1.6 host, no GRU)
+  joins `TemporalWMAdapter` in `econsae/sae/forge_adapter.py`. Same
+  fc1-bridge projection algebra; just the forward pass and the absence
+  of GRU parameters differ. `attn_acts` is now wired into stage 7a's
+  `SYNTHETIC_HOSTS` table. Forge against existing attn SAEs:
+  - `attn_experiment/jr_w256_ep200.pt` (217 features over 192-d, ~1.1x
+    over-complete): `next_state_mse = 5.35`.
+  - `attn_experiment/jr_w1024_ep200.pt` (962 features over 192-d, ~5x
+    over-complete): `next_state_mse = 443.5` -- the projection
+    algebra's reconstruction error compounds with basis
+    over-completeness. **Headline diagnostic**: forge MSE scales
+    sharply with the over-completeness ratio in the single-bridge
+    architecture. The supervised Phase 9.2.1 SAE (437 features over
+    192-d, MSE 0.78) is 7x more faithful than the unsupervised
+    width-256 attn SAE despite being larger -- the dual-head
+    supervision produces a basis whose `fc2` reconstruction is much
+    cleaner, not just one whose interpretability metrics look better.
+  Side note on scale-boost calibration: `--scale-boost` is now exposed
+  on `forge_pipeline.py` (default `auto`), and the value is reported
+  in the stage-7a summary. In the single-bridge architecture the
+  scale_boost cancels exactly between fc1 (encode * sb) and fc2
+  (decode / sb), so it changes the forged module's internal
+  activations but not the next-state MSE -- a real finding, since
+  saeforge's residual-stream architecture requires non-trivial
+  scale_boost tuning to stay numerically stable.
+- **Phase 9.4+**: calibration to historical macro data;
+  LLM-augmented agents.
 
 ## Acknowledgements
 

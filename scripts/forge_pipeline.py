@@ -124,11 +124,37 @@ def _build_acts_dual_head_synthetic_eval(n_traj: int = 4, n_periods: int = 20):
     return host, x_zscored
 
 
+def _build_attn_acts_synthetic_eval(n_traj: int = 4, n_periods: int = 20):
+    """Phase 9.3 host loader: AttnWorldModel, per-period h1 substrate.
+
+    Returns a (n_traj * n_periods, N, in_dim) z-scored tensor -- AttnWorldModel
+    has no time axis, so we flatten the trajectory dim into the batch.
+    """
+    from econsae.sae.world_model import AttnWorldModel, build_attn_data
+    from econsae.simulator.ensemble import generate_ensemble
+
+    ckpt = torch.load(
+        os.path.join(REPO_ROOT, "runs", "world_model_attn.pt"),
+        map_location="cpu", weights_only=False,
+    )
+    host = AttnWorldModel(**ckpt["config"])
+    host.load_state_dict(ckpt["state_dict"])
+    host.eval()
+    # Phase 1.6 attn experiment used sentiment_strength=0.0 (no sentiment-
+    # driven MPC); matching that here.
+    ens = generate_ensemble(n_trajectories=n_traj, n_periods=n_periods,
+                             seed=42, sentiment_strength=0.0)
+    data = build_attn_data(ens.trajectories, ens.shock_schedules)
+    # data.X: (P, N, in_dim) -- already per-period
+    x_zscored = ((data.X - host.x_mean) / host.x_std).to(torch.float32)
+    return host, x_zscored
+
+
 SYNTHETIC_HOSTS = {
     "acts": _build_acts_synthetic_eval,
     "macro": _build_macro_synthetic_eval,
     "acts_dual_head": _build_acts_dual_head_synthetic_eval,
-    # "attn_acts": None  -- AttnWorldModel adapter is a Phase 9.3 extension.
+    "attn_acts": _build_attn_acts_synthetic_eval,
 }
 
 
@@ -271,6 +297,10 @@ def main():
     ap.add_argument("--select-by", default="firing_rate",
                     choices=sorted(SELECTORS.keys()), dest="select_by")
     ap.add_argument("--out", default=os.path.join(REPO_ROOT, "runs", "forge"))
+    ap.add_argument("--scale-boost", default="auto", dest="scale_boost",
+                    help="SubspaceProjector scale_boost ('auto' or a float). "
+                         "'auto' picks min(1.0, d_model / n_features) -- "
+                         "important for over-complete bases where 1.0 blows up.")
     args = ap.parse_args()
 
     run_name = os.path.splitext(os.path.basename(args.sae_ckpt))[0]
@@ -356,11 +386,18 @@ def main():
     if args.feed_type in SYNTHETIC_HOSTS:
         t0 = time.time()
         host, x_eval = SYNTHETIC_HOSTS[args.feed_type]()
-        synth_summary = forge_synthetic(compressed_path, host, x_eval, run_dir)
+        # Accept either "auto" or a float string for --scale-boost.
+        try:
+            scale_boost: float | str = float(args.scale_boost)
+        except ValueError:
+            scale_boost = args.scale_boost
+        synth_summary = forge_synthetic(compressed_path, host, x_eval, run_dir,
+                                          scale_boost=scale_boost)
         print(f"      status={synth_summary['status']}  ({time.time() - t0:.1f}s)")
         if synth_summary["status"] == "ok":
             print(f"      next_state_mse={synth_summary['next_state_mse']:.6f}  "
-                  f"n_params_forged={synth_summary['n_params_forged']}")
+                  f"n_params_forged={synth_summary['n_params_forged']}  "
+                  f"scale_boost={synth_summary['scale_boost']:.3f}")
     else:
         print(f"      status={synth_summary['status']}  ({synth_summary['reason']})")
 
