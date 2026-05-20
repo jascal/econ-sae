@@ -459,14 +459,41 @@ def forge_synthetic(
         out["error"] = f"{type(e).__name__}: {e}"
         return out
 
+    # post-A: variance of x_eval's h1 activations preserved by the kept-
+    # features subspace. The "missing piece" sm-sae exposes alongside forge
+    # faithfulness -- both projects independently found that no single
+    # number is sufficient. Computed inline because the metric is sm-sae-
+    # internal (not in sae-forge v0.7.0 itself).
+    with torch.no_grad():
+        host_h1 = host.h1(x_eval.to(next(host.parameters()).device))
+        h1_flat = host_h1.reshape(-1, host_h1.shape[-1]).cpu().numpy().astype(np.float64)
+    E = basis.pseudoinverse()                         # (d_model, n_features)
+    W_dec_np = basis.W_dec.astype(np.float64)        # (n_features, d_model)
+    # Round-trip through the basis: encode then decode (no scale_boost --
+    # the metric measures the subspace's reconstruction power, not the
+    # projector's calibration).
+    h1_reproj = (h1_flat @ E) @ W_dec_np
+    var_total = float(np.var(h1_flat))
+    var_resid = float(np.var(h1_flat - h1_reproj))
+    post_a = 1.0 - (var_resid / max(var_total, 1e-12)) if var_total > 0 else 0.0
+
+    # v0.7.0 forge_quality: rank-based feasibility tier
+    from saeforge.forge_quality import classify_quality, compute_basis_rank
+    basis_rank = int(compute_basis_rank(basis.W_dec))
+    quality_ratio, quality_tier = classify_quality(basis_rank, basis.d_model)
+
     out.update({
         "basis": {
             "n_features": int(basis.n_features),
             "d_model": int(basis.d_model),
+            "rank": basis_rank,
             "scale_compression_ratio": float(basis.scale_compression_ratio),
         },
         "scale_boost": float(projector.scale_boost),
         "next_state_mse": float(result.faithfulness),
+        "post_a_variance_preserved": float(post_a),
+        "quality_ratio": float(quality_ratio),
+        "quality_tier": str(quality_tier.value),
         "faithfulness_target": result.faithfulness_target_name,
         "n_params_forged": int(result.n_params),
         "x_eval_shape": list(x_eval.shape),

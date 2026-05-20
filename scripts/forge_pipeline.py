@@ -396,7 +396,10 @@ def main():
         print(f"      status={synth_summary['status']}  ({time.time() - t0:.1f}s)")
         if synth_summary["status"] == "ok":
             print(f"      next_state_mse={synth_summary['next_state_mse']:.6f}  "
-                  f"n_params_forged={synth_summary['n_params_forged']}  "
+                  f"post_a={synth_summary['post_a_variance_preserved']:.3f}  "
+                  f"quality={synth_summary['quality_tier']} "
+                  f"(ratio={synth_summary['quality_ratio']:.3f})")
+            print(f"      n_params_forged={synth_summary['n_params_forged']}  "
                   f"scale_boost={synth_summary['scale_boost']:.3f}")
     else:
         print(f"      status={synth_summary['status']}  ({synth_summary['reason']})")
