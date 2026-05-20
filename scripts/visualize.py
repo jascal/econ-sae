@@ -568,8 +568,15 @@ def section_polygram() -> str:
                 f"{escape(r['error'][:60])}</td></tr>"
             )
             continue
-        eff = ("N/A" if r["cancellation_efficiency"] is None
-               else f"{r['cancellation_efficiency']:.1%}")
+        # at_structural_floor is written by econsae.polygram_bridge when run
+        # against polygram v0.11+. Older JSON without the field falls back
+        # to the legacy is-None check.
+        at_floor = r.get("at_structural_floor", False)
+        eff = (
+            "N/A"
+            if (r["cancellation_efficiency"] is None or at_floor)
+            else f"{r['cancellation_efficiency']:.1%}"
+        )
         canc_rows.append(
             f"<tr><td><code>{escape(r['label'])}</code></td>"
             f"<td>{escape(' / '.join(r['pair']))}</td>"

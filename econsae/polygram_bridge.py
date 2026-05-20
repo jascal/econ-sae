@@ -169,8 +169,15 @@ def run_cancellation(dictionary: Dictionary,
         optimize={"method": "grid", "max_steps": 40},
     )
     result = cancel.run()
-    eff = (None if result.cancellation_efficiency is None
-           else float(result.cancellation_efficiency))
+    # polygram v0.11+ splits at-floor (efficiency=0.0, at_structural_floor=True)
+    # from floor-undefined (efficiency=None). Use getattr so this stays
+    # back-compatible with polygram<=0.10 where the new field is absent.
+    at_floor = getattr(result, "at_structural_floor", False)
+    eff = (
+        None
+        if (result.cancellation_efficiency is None or at_floor)
+        else float(result.cancellation_efficiency)
+    )
     print(f"  before={result.before_overlap:.4f}  after={result.after_overlap:.4f}  "
           f"floor={result.structural_floor:.4f}  "
           f"eff={'N/A' if eff is None else f'{eff:.2%}'}  met={result.tolerance_met}")
@@ -183,6 +190,7 @@ def run_cancellation(dictionary: Dictionary,
         "after_overlap": float(result.after_overlap),
         "structural_floor": float(result.structural_floor),
         "cancellation_efficiency": eff,
+        "at_structural_floor": bool(at_floor),
         "tolerance_met": bool(result.tolerance_met),
         "n_evaluations": int(len(result.trajectory)),
     }
@@ -308,7 +316,16 @@ def main(feature_aucs: dict[str, float] | None = None,
             print(f"{r['label']:<24s} {' / '.join(r['pair']):<46s}  "
                   f"ERROR: {r['error'][:40]}")
             continue
-        eff = "N/A" if r["cancellation_efficiency"] is None else f"{r['cancellation_efficiency']:.1%}"
+        # at_structural_floor is populated when this bridge runs against
+        # polygram v0.11+; older JSON without the field falls back to the
+        # legacy is-None check (which still caught at-floor under the
+        # old polygram semantics).
+        at_floor = r.get("at_structural_floor", False)
+        eff = (
+            "N/A"
+            if (r["cancellation_efficiency"] is None or at_floor)
+            else f"{r['cancellation_efficiency']:.1%}"
+        )
         print(f"{r['label']:<24s} {' / '.join(r['pair']):<46s} "
               f"{r['before_overlap']:>7.4f} {r['after_overlap']:>7.4f} "
               f"{r['structural_floor']:>7.4f} {eff:>7s} "
