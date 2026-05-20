@@ -43,6 +43,10 @@ from pathlib import Path
 import numpy as np
 import torch
 
+# Side-effect import: registers TemporalWMAdapter / DualHeadRegimeWM with
+# saeforge so `run_synthetic` can dispatch on econ-sae host models.
+from econsae.sae import forge_adapter as _forge_adapter  # noqa: F401
+
 
 # ---------------------------------------------------------------------------
 # Stage 1: load SAE
@@ -375,21 +379,106 @@ def compress(vreport, sae_safetensors_path: str, out_path: str,
 
 
 # ---------------------------------------------------------------------------
-# Stage 7: saeforge basis evaluation
+# Stage 7a: real saeforge run_synthetic via the TemporalWMAdapter
+# (Phase 9.2; lands after the basis-projection eval in stage 7b)
 # ---------------------------------------------------------------------------
-# Note: full ForgePipeline.run_synthetic requires a WorldModel adapter
-# (saeforge.adapters.base.ArchitectureAdapter) for the host architecture.
-# saeforge 0.5.1 ships adapters for gpt2/llama/gemma/qwen/whisper -- all
-# transformer LLMs. econ-sae's TemporalWorldModel (attention + GRU + MLP
-# heads) doesn't match any of them, so a "full forge" into one of the
-# bundled hosts would be a category mismatch.
-#
-# The minimum viable saeforge integration is the basis-projection step:
-# load the polygram-compressed checkpoint as a FeatureBasis, project the
-# original SAE activations onto it via SubspaceProjector, and score the
-# projected activations against the GT labels via GroundTruthTarget. This
-# validates that polygram's compression preserves the GT-aligned features
-# without needing to forge into an alien host architecture.
+def forge_synthetic(
+    compressed_path: str,
+    host,
+    x_eval: torch.Tensor,
+    run_dir: str,
+) -> dict:
+    """Run saeforge's `ForgePipeline.run_synthetic` against a TemporalWM host.
+
+    Builds a `FeatureBasis` from the polygram-compressed safetensors, wraps
+    it in a `SubspaceProjector`, dispatches `TemporalWMAdapter` via the
+    `forge_adapter` registration (imported at module top), and scores
+    next-state MSE between forged and host outputs on `x_eval` (a z-scored
+    (B, T, N, in_dim) tensor).
+
+    Returns a dict with the basis dims, MSE faithfulness, and forged-module
+    parameter count. Status is `"skipped"` when the host's class has no
+    registered adapter (e.g. `AttnWorldModel` until a Phase 9.3 adapter
+    lands).
+    """
+    from saeforge.adapters import adapter_for
+    from saeforge.basis import FeatureBasis
+    from saeforge.forge import ForgePipeline
+    from saeforge.projector import SubspaceProjector
+
+    from econsae.sae.forge_adapter import NextStateMSE
+
+    out: dict = {"status": "ok"}
+    try:
+        adapter_for(host)
+    except NotImplementedError as e:
+        out["status"] = "no_adapter"
+        out["error"] = str(e)
+        return out
+    try:
+        basis = FeatureBasis.from_polygram_checkpoint(compressed_path)
+    except Exception as e:
+        out["status"] = "basis_load_failed"
+        out["error"] = f"{type(e).__name__}: {e}"
+        return out
+
+    # The adapter projects fc1's output (= host.h1_dim) through the basis.
+    # When basis.d_model != host.h1_dim the SAE was trained on a different
+    # substrate (e.g. the engineered macro feed, d=223) and there is no
+    # single fc1-aligned bridge point in the host. Surface a clean skip so
+    # the failure mode is obvious.
+    if basis.d_model != getattr(host, "h1_dim", basis.d_model):
+        out["status"] = "dim_mismatch"
+        out["error"] = (
+            f"basis.d_model={basis.d_model} but host.h1_dim="
+            f"{host.h1_dim}. The adapter bridges at fc1; an SAE whose "
+            f"input dim differs from h1_dim wasn't trained on a layer of "
+            f"this host."
+        )
+        return out
+
+    projector = SubspaceProjector(basis=basis)
+    pipeline = ForgePipeline(
+        basis=basis, projector=projector,
+        faithfulness=NextStateMSE(),
+        # The default "auto" mode picks "host_wrapped" for under-complete
+        # bases; that path requires an adapter `host_wrapped_module`
+        # override (a Phase 9.3 extension). The native-in-basis path runs
+        # against the projected weights only — exactly what we want here.
+        forward_mode="native_in_basis",
+    )
+    forged_dir = os.path.join(run_dir, "forged_synthetic")
+    try:
+        result = pipeline.run_synthetic(
+            host_model=host, output_dir=forged_dir, eval_input_ids=x_eval,
+        )
+    except Exception as e:
+        out["status"] = "run_synthetic_failed"
+        out["error"] = f"{type(e).__name__}: {e}"
+        return out
+
+    out.update({
+        "basis": {
+            "n_features": int(basis.n_features),
+            "d_model": int(basis.d_model),
+            "scale_compression_ratio": float(basis.scale_compression_ratio),
+        },
+        "next_state_mse": float(result.faithfulness),
+        "faithfulness_target": result.faithfulness_target_name,
+        "n_params_forged": int(result.n_params),
+        "x_eval_shape": list(x_eval.shape),
+        "forged_dir": forged_dir,
+    })
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Stage 7b: saeforge basis evaluation (kept-subspace GT-AUC)
+# ---------------------------------------------------------------------------
+# The basis-projection step here is independent of `forge_synthetic`: it
+# answers "does compressing the SAE preserve the GT-recoverable features?"
+# rather than "does the forged downstream computation track the host's?".
+# Phase 9.2 reports both numbers side-by-side in the stage-7 summary.
 def forge_evaluate(compressed_path: str, sae, feed, run_dir: str) -> dict:
     """Use saeforge to load + project + score the polygram-compressed SAE.
 
@@ -466,11 +555,10 @@ def forge_evaluate(compressed_path: str, sae, feed, run_dir: str) -> dict:
     out["delta_cov95"] = float(gt_kept["coverage_0.95"]
                                  - gt_full["coverage_0.95"])
     out["note"] = (
-        "Projection-only evaluation. Full ForgePipeline.run_synthetic "
-        "requires a custom WorldModel adapter for econ-sae's "
-        "TemporalWorldModel; saeforge 0.5.1 ships transformer adapters "
-        "only. The kept-subspace score isolates the compressor's "
-        "redundancy-removal impact on GT recoverability."
+        "Kept-subspace GT-AUC eval. Complements forge_synthetic's "
+        "next-state MSE: this answers 'does compression preserve GT-"
+        "recoverable features?', not 'does the forged forward track "
+        "the host's?'. Phase 9.2 reports both numbers."
     )
     return out
 

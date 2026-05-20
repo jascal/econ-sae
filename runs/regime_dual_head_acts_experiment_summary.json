@@ -1,0 +1,48 @@
+[
+  {
+    "run_id": "jr_w512_ep100",
+    "feed": "acts_regime_dual_head",
+    "variant": "jumprelu",
+    "n_sae_features": 512,
+    "n_active": 512,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.38461538461538464,
+    "coverage_0.90": 0.4423076923076923,
+    "mean_best_auc": 0.8046227097511292,
+    "monosemanticity": 0.271484375,
+    "n_top_matches": 20,
+    "per_tier": {
+      "categorical": {
+        "n_features": 31,
+        "coverage_0.95": 0.3225806451612903,
+        "coverage_0.90": 0.3225806451612903,
+        "mean_best_auc": 0.7323601841926575
+      },
+      "bucketed": {
+        "n_features": 7,
+        "coverage_0.95": 0.2857142857142857,
+        "coverage_0.90": 0.42857142857142855,
+        "mean_best_auc": 0.850563645362854
+      },
+      "conjunctive": {
+        "n_features": 8,
+        "coverage_0.95": 0.375,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.9288953542709351
+      },
+      "regime": {
+        "n_features": 6,
+        "coverage_0.95": 0.8333333333333334,
+        "coverage_0.90": 0.8333333333333334,
+        "mean_best_auc": 0.9586842656135559
+      }
+    },
+    "name": "jr_w512_ep100",
+    "n_features": 512,
+    "epochs": 100,
+    "recon_loss": 0.007526956964284182,
+    "l0": 94.24659729003906,
+    "var_explained": 0.9914276617845105,
+    "wall_time_s": 278.1119921207428
+  }
+]

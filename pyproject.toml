@@ -30,7 +30,7 @@ dependencies = [
 [project.optional-dependencies]
 polygram = [
   "polygram @ git+https://github.com/jascal/polygram.git@v0.10.0",
-  "sae-forge @ git+https://github.com/jascal/sae-forge.git@987c9b18cdc60e3b5e18041d3fb4edf493afd94a",
+  "sae-forge[torch] @ git+https://github.com/jascal/sae-forge.git@987c9b18cdc60e3b5e18041d3fb4edf493afd94a",
 ]
 viz = [
   "matplotlib>=3.7",

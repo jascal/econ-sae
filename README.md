@@ -1123,14 +1123,14 @@ structure. This is the validation that polygram's `merge` strategy
 preserves interpretability: compression is lossless at the GT-AUC
 metric.
 
-What's NOT integrated: full `ForgePipeline.run_synthetic` requires a
-custom `WorldModel` adapter (saeforge.adapters.base.ArchitectureAdapter)
-for the host architecture. saeforge 0.5.1 ships adapters for
-transformer LLMs (gpt2 / llama / gemma / qwen / whisper) -- none of
-which match econ-sae's TemporalWorldModel (attention + GRU + MLP).
-Writing a custom adapter for our architecture is a Phase 9.2 project;
-the projection + faithfulness eval implemented here is the meaningful
-subset for our use case.
+**Phase 9.2 update**: the custom `WorldModel` adapter now lives at
+`econsae/sae/forge_adapter.py`. `TemporalWMAdapter` registers for both
+`TemporalWorldModel` and `DualHeadRegimeWM` at import time, walks every
+host parameter (projecting `fc1` and `fc2` through the basis,
+pass-through for everything else), and pairs with a `NextStateMSE`
+`FaithfulnessTarget`. `ForgePipeline.run_synthetic` now completes
+end-to-end against an econ-sae host (`scripts/forge_pipeline.py` stage
+7a).
 
 ## Why econ-sae is *harder* than sm-sae
 
@@ -1399,16 +1399,42 @@ the full alignment matrix and per-tier metrics are written to
   **Conjunctive 8/8 at AUC >= 0.95 in a single run, mAUC 0.999.** Both
   supervised tiers (conjunctive + regime) are now fully recovered in
   single training runs.
-- **Phase 9.1** (latest): real saeforge integration in stage 7 of the
+- **Phase 9.1**: real saeforge integration in stage 7 of the
   forge pipeline. `FeatureBasis.from_polygram_checkpoint` +
   `SubspaceProjector` + GT-AUC eval. Validation finding: polygram's
   compression (Phase 6.2 SAE, removed 88 features as redundant)
   preserves GT-recoverable structure exactly -- kept-subspace mAUC
   matches the full-SAE mAUC at 0.734, delta = 0.000.
-- **Phase 9.2+**: custom `WorldModel` adapter for econ-sae's
-  TemporalWorldModel so `ForgePipeline.run_synthetic` can fine-tune
-  into a host architecture; calibration to historical macro data;
-  LLM-augmented agents.
+- **Phase 9.2**: custom `ArchitectureAdapter` for `TemporalWorldModel`
+  (`econsae/sae/forge_adapter.py`) closing the last stub in the forge
+  pipeline. `saeforge.ForgePipeline.run_synthetic` now runs end-to-end
+  against an econ-sae host: the adapter projects `fc1` (encode) and
+  `fc2` (decode) through the basis, walks all other layers verbatim,
+  builds a `ForgedTemporalWorldModel`, and scores `next_state_mse`
+  between forged and host predictions. Stage 7 of
+  `scripts/forge_pipeline.py` is split into 7a (MSE faithfulness via
+  `run_synthetic`) and 7b (kept-subspace GT-AUC, the Phase 9.1 signal)
+  -- both numbers in the stage-9 summary JSON. On the
+  temporal-sentiment acts SAE: `next_state_mse = 1.781` with a 155k-
+  param forged module. The macro-feed SAE is gated by a clean
+  `dim_mismatch` skip in stage 7a (its 223-d substrate isn't `fc1`'s
+  192-d output), so MSE is undefined there even though GT-AUC still
+  reports cleanly.
+- **Phase 9.2.1** (latest): SAE trained directly on `DualHeadRegimeWM`
+  h1 (192-d), the substrate `TemporalWMAdapter.fc1` actually bridges.
+  Single JumpReLU at width 512, 100 epochs (5 min). Tier mAUCs:
+  **regime 0.959** (5/6 features above 0.95), conjunctive 0.929,
+  bucketed 0.851 -- the dual-head supervision shows up directly in h1
+  without needing the engineered macro-feed substrate. Polygram
+  compresses 128 dictionary features into **6 clusters** (same "6
+  distinct concepts" signature as Phase 9.1), zeroing 75 as redundant.
+  Forge eval: `next_state_mse = 0.784` (2.3x lower than the Phase 1.x
+  acts SAE in 9.2 -- the supervised representation forges more
+  faithfully), kept-subspace mAUC 0.804 with delta = -0.001 vs full
+  SAE. New `acts_dual_head` feed type in `scripts/forge_pipeline.py`.
+- **Phase 9.3+**: AttnWorldModel adapter (the remaining feed type);
+  scale-boost calibration for over-complete bases; calibration to
+  historical macro data; LLM-augmented agents.
 
 ## Acknowledgements
 

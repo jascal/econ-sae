@@ -10,9 +10,9 @@ adaptations:
     they live under `runs/{experiment}/...pt` with experiment-specific
     naming. The pipeline takes a direct `--sae-ckpt` path.
 
-Stages 1-6 and 8-9 are implemented now. Stage 7 (forge into a host
-transformer) is a stub gated on sae-forge's pluggable-Faithfulness
-release, mirroring sm-sae.
+All stages implemented. Stage 7 is split into 7a (saeforge run_synthetic
+through the TemporalWMAdapter -- next-state MSE faithfulness) and 7b
+(kept-subspace GT-AUC -- the Phase 9.1 interpretability signal).
 
 Usage:
     python scripts/forge_pipeline.py \\
@@ -56,9 +56,80 @@ import torch
 
 from econsae.sae.forge_bridge import (
     SELECTORS, build_dictionary, build_records, compress, convert_to_safetensors,
-    forge_evaluate, load_sae, score_against_gt, synthesize_validation_report,
-    write_report,
+    forge_evaluate, forge_synthetic, load_sae, score_against_gt,
+    synthesize_validation_report, write_report,
 )
+
+
+# ---------------------------------------------------------------------------
+# Host-model + eval-input builders for Phase 9.2 run_synthetic. Mirrors the
+# FEEDS dict — same source-of-truth pattern for which world-model checkpoint
+# pairs with which feed type. None for feed types whose host has no
+# registered adapter (e.g. AttnWorldModel; a Phase 9.3 extension).
+# ---------------------------------------------------------------------------
+def _build_acts_synthetic_eval(n_traj: int = 4, n_periods: int = 20):
+    from econsae.sae.world_model import TemporalWorldModel, build_temporal_data
+    from econsae.simulator.ensemble import generate_ensemble
+
+    ckpt = torch.load(
+        os.path.join(REPO_ROOT, "runs", "world_model_temporal_sentiment.pt"),
+        map_location="cpu", weights_only=False,
+    )
+    host = TemporalWorldModel(**ckpt["config"])
+    host.load_state_dict(ckpt["state_dict"])
+    host.eval()
+    ens = generate_ensemble(n_trajectories=n_traj, n_periods=n_periods,
+                             seed=42, sentiment_strength=0.20)
+    data = build_temporal_data(ens.trajectories, ens.shock_schedules)
+    x_zscored = ((data.X - host.x_mean) / host.x_std).to(torch.float32)
+    return host, x_zscored
+
+
+def _build_macro_synthetic_eval(n_traj: int = 4, n_periods: int = 20):
+    from econsae.sae.world_model import build_temporal_data
+    from econsae.simulator.ensemble import generate_ensemble
+    from scripts.regime_dual_head_experiment import DualHeadRegimeWM
+
+    ckpt = torch.load(
+        os.path.join(REPO_ROOT, "runs", "world_model_regime_dual_head.pt"),
+        map_location="cpu", weights_only=False,
+    )
+    host = DualHeadRegimeWM(**ckpt["config"])
+    host.load_state_dict(ckpt["state_dict"])
+    host.eval()
+    ens = generate_ensemble(n_trajectories=n_traj, n_periods=n_periods,
+                             seed=42, sentiment_strength=0.20)
+    data = build_temporal_data(ens.trajectories, ens.shock_schedules)
+    x_zscored = ((data.X - host.x_mean) / host.x_std).to(torch.float32)
+    return host, x_zscored
+
+
+def _build_acts_dual_head_synthetic_eval(n_traj: int = 4, n_periods: int = 20):
+    """Phase 9.2.1 host loader: DualHeadRegimeWM, h1 substrate."""
+    from econsae.sae.world_model import build_temporal_data
+    from econsae.simulator.ensemble import generate_ensemble
+    from scripts.regime_dual_head_experiment import DualHeadRegimeWM
+
+    ckpt = torch.load(
+        os.path.join(REPO_ROOT, "runs", "world_model_regime_dual_head.pt"),
+        map_location="cpu", weights_only=False,
+    )
+    host = DualHeadRegimeWM(**ckpt["config"])
+    host.load_state_dict(ckpt["state_dict"])
+    host.eval()
+    ens = generate_ensemble(n_trajectories=n_traj, n_periods=n_periods,
+                             seed=42, sentiment_strength=0.20)
+    data = build_temporal_data(ens.trajectories, ens.shock_schedules)
+    x_zscored = ((data.X - host.x_mean) / host.x_std).to(torch.float32)
+    return host, x_zscored
+
+
+SYNTHETIC_HOSTS = {
+    "acts": _build_acts_synthetic_eval,
+    "macro": _build_macro_synthetic_eval,
+    "acts_dual_head": _build_acts_dual_head_synthetic_eval,
+    # "attn_acts": None  -- AttnWorldModel adapter is a Phase 9.3 extension.
+}
 
 
 # ---------------------------------------------------------------------------
@@ -112,6 +183,36 @@ def _build_macro_feed():
     return build_macro_feed_v3(ens.trajectories, ens.shock_schedules, wm)
 
 
+def _build_acts_dual_head_feed():
+    """Per-(period, agent) feed from DualHeadRegimeWM h1 (Phase 9.2.1)."""
+    from econsae.sae.data import Feed
+    from econsae.sae.world_model import extract_temporal_h1_activations
+    from econsae.simulator.ensemble import generate_ensemble
+    from econsae.ground_truth import build_feature_matrix
+    from scripts.regime_dual_head_experiment import DualHeadRegimeWM
+
+    ens = generate_ensemble(n_trajectories=128, n_periods=100, seed=0,
+                            sentiment_strength=0.20)
+    ckpt = torch.load(
+        os.path.join(REPO_ROOT, "runs", "world_model_regime_dual_head.pt"),
+        map_location="cpu", weights_only=False,
+    )
+    wm = DualHeadRegimeWM(**ckpt["config"])
+    wm.load_state_dict(ckpt["state_dict"])
+    wm.eval()
+    H1, idx = extract_temporal_h1_activations(wm, ens.trajectories,
+                                               ens.shock_schedules)
+    fm = build_feature_matrix(ens.trajectories, ens.shock_schedules)
+    assert idx == fm.sample_index
+    return Feed(
+        name="acts_dual_head_for_forge",
+        X=torch.tensor(H1, dtype=torch.float32),
+        Y=fm.Y, feature_vocab=fm.feature_vocab, sample_index=fm.sample_index,
+        notes=("DualHeadRegimeWM h1 (192-d). Substrate aligned with "
+               "TemporalWMAdapter.fc1 for the Phase 9.2 forge."),
+    )
+
+
 def _build_attn_acts_feed():
     """Per-(period, agent) feed using the Phase 1.6 AttnWorldModel.
 
@@ -149,9 +250,10 @@ def _build_attn_acts_feed():
 
 
 FEEDS = {
-    "acts":      _build_acts_feed,
-    "macro":     _build_macro_feed,
-    "attn_acts": _build_attn_acts_feed,
+    "acts":           _build_acts_feed,
+    "macro":          _build_macro_feed,
+    "acts_dual_head": _build_acts_dual_head_feed,
+    "attn_acts":      _build_attn_acts_feed,
 }
 
 
@@ -247,9 +349,24 @@ def main():
         comp_summary = {"error": f"{type(e).__name__}: {e}"}
         print(f"      Compressor failed: {comp_summary['error']}")
 
-    # Stage 7: saeforge basis projection + GT eval (full forge into a
-    # transformer host is a category mismatch for our custom WM)
-    print(f"  [7] saeforge basis evaluation  ...")
+    # Stage 7a: saeforge run_synthetic via TemporalWMAdapter (Phase 9.2)
+    print(f"  [7a] saeforge run_synthetic (next-state MSE)  ...")
+    synth_summary: dict = {"status": "skipped",
+                            "reason": f"no synthetic host for feed-type={args.feed_type}"}
+    if args.feed_type in SYNTHETIC_HOSTS:
+        t0 = time.time()
+        host, x_eval = SYNTHETIC_HOSTS[args.feed_type]()
+        synth_summary = forge_synthetic(compressed_path, host, x_eval, run_dir)
+        print(f"      status={synth_summary['status']}  ({time.time() - t0:.1f}s)")
+        if synth_summary["status"] == "ok":
+            print(f"      next_state_mse={synth_summary['next_state_mse']:.6f}  "
+                  f"n_params_forged={synth_summary['n_params_forged']}")
+    else:
+        print(f"      status={synth_summary['status']}  ({synth_summary['reason']})")
+
+    # Stage 7b: kept-subspace GT-AUC eval (Phase 9.1, retained as a
+    # complementary interpretability signal alongside the MSE)
+    print(f"  [7b] saeforge kept-subspace GT-AUC eval  ...")
     forge_summary = forge_evaluate(compressed_path, sae, feed, run_dir)
     print(f"      status={forge_summary['status']}")
     if forge_summary["status"] == "ok":
@@ -286,6 +403,7 @@ def main():
             "n_confirmed": n_confirmed,
         },
         "compression":    comp_summary,
+        "forge_synthetic": synth_summary,
         "forge":          forge_summary,
         "gt_alignment":   gt_summary,
         "wall_time_s":    float(time.time() - t_start),
