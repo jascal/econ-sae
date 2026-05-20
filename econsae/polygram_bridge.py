@@ -20,6 +20,14 @@ Experiments:
   2. InterferenceSweep on a structurally-related pair.
   3. Cancellation across a hand-picked set of within-tier and
      cross-tier pairs that reveal econ-sae's compositional geometry.
+
+polygram v0.11.0 compatibility:
+  ``CancellationResult.cancellation_efficiency`` previously returned
+  ``None`` for both at-floor and floor-undefined cases. v0.11.0 reserves
+  ``None`` for floor-undefined; at-floor returns ``0.0`` and sets the
+  new field ``at_structural_floor=True``. The helpers below branch on
+  the new field (with ``getattr`` / ``dict.get`` fallbacks) so this
+  bridge works against polygram<=0.10 too.
 """
 
 from __future__ import annotations
@@ -40,6 +48,45 @@ from econsae.sae.evaluation import feature_tier
 
 
 OUT_DIR = "runs/polygram"
+
+
+# ---------------------------------------------------------------------------
+# polygram v0.11.0 efficiency-display helpers.
+#
+# `CancellationResult.cancellation_efficiency` previously returned None
+# both at the structural floor AND when the floor itself was undefined.
+# v0.11.0 splits these: at-floor returns 0.0 with at_structural_floor=True;
+# None is reserved for floor-undefined. These helpers unify the two
+# cases at the display layer so the bridge, the summary table, and the
+# HTML visualizer all branch on the same condition. `getattr` / `dict.get`
+# fallbacks keep them working against polygram<=0.10 too.
+# ---------------------------------------------------------------------------
+def is_at_floor_or_undefined(result_or_dict) -> bool:
+    """True when either at-floor (v0.11+ flag) or floor-undefined (efficiency=None)."""
+    if hasattr(result_or_dict, "cancellation_efficiency"):
+        # CancellationResult object (in-process path).
+        if getattr(result_or_dict, "at_structural_floor", False):
+            return True
+        return result_or_dict.cancellation_efficiency is None
+    # JSON dict path.
+    if result_or_dict.get("at_structural_floor", False):
+        return True
+    return result_or_dict.get("cancellation_efficiency") is None
+
+
+def efficiency_for_display(result_or_dict, fmt: str = ".2%") -> str:
+    """Format efficiency for human display; returns "N/A" for at-floor /
+    floor-undefined and the formatted percentage otherwise.
+
+    Accepts either a polygram CancellationResult OR a dict-from-JSON
+    that mirrors this bridge's serialized cancellation entry."""
+    if is_at_floor_or_undefined(result_or_dict):
+        return "N/A"
+    if hasattr(result_or_dict, "cancellation_efficiency"):
+        eff = float(result_or_dict.cancellation_efficiency)
+    else:
+        eff = float(result_or_dict["cancellation_efficiency"])
+    return format(eff, fmt)
 
 
 # ---------------------------------------------------------------------------
@@ -169,11 +216,15 @@ def run_cancellation(dictionary: Dictionary,
         optimize={"method": "grid", "max_steps": 40},
     )
     result = cancel.run()
-    eff = (None if result.cancellation_efficiency is None
-           else float(result.cancellation_efficiency))
+    at_floor = getattr(result, "at_structural_floor", False)
+    eff_value = (
+        None
+        if is_at_floor_or_undefined(result)
+        else float(result.cancellation_efficiency)
+    )
     print(f"  before={result.before_overlap:.4f}  after={result.after_overlap:.4f}  "
           f"floor={result.structural_floor:.4f}  "
-          f"eff={'N/A' if eff is None else f'{eff:.2%}'}  met={result.tolerance_met}")
+          f"eff={efficiency_for_display(result)}  met={result.tolerance_met}")
     out_path = os.path.join(OUT_DIR, f"cancellation_{label}")
     os.makedirs(out_path, exist_ok=True)
     result.materialize(out_path)
@@ -182,7 +233,8 @@ def run_cancellation(dictionary: Dictionary,
         "before_overlap": float(result.before_overlap),
         "after_overlap": float(result.after_overlap),
         "structural_floor": float(result.structural_floor),
-        "cancellation_efficiency": eff,
+        "cancellation_efficiency": eff_value,
+        "at_structural_floor": bool(at_floor),
         "tolerance_met": bool(result.tolerance_met),
         "n_evaluations": int(len(result.trajectory)),
     }
@@ -308,7 +360,7 @@ def main(feature_aucs: dict[str, float] | None = None,
             print(f"{r['label']:<24s} {' / '.join(r['pair']):<46s}  "
                   f"ERROR: {r['error'][:40]}")
             continue
-        eff = "N/A" if r["cancellation_efficiency"] is None else f"{r['cancellation_efficiency']:.1%}"
+        eff = efficiency_for_display(r, fmt=".1%")
         print(f"{r['label']:<24s} {' / '.join(r['pair']):<46s} "
               f"{r['before_overlap']:>7.4f} {r['after_overlap']:>7.4f} "
               f"{r['structural_floor']:>7.4f} {eff:>7s} "

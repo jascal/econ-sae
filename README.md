@@ -537,6 +537,16 @@ overlaps and the interference-sweep range (0.77-1.00) reveal which
 feature axes carry meaningful phase modulation in econ-sae's
 substrate.
 
+Pinned to `polygram>=0.11.0`. The bridge reads the v0.11
+`at_structural_floor` flag on each `CancellationResult` and renders
+`cancellation efficiency: N/A` for the at-floor case (rather than the
+misleading `0.00%` that the older `efficiency is None` semantic would
+have implied). v0.11 also surfaces compression / convergence-test
+diagnostics (`rank_ratio`, `post_A`, `forge_mse`, `informative_metric`
+on the polygram report types) — not yet wired into the econ-sae
+Pareto tables, but available for a follow-up that mirrors sae-forge
+PR #67.
+
 **GatedSAE** (`econsae/sae/models.py`,
 `scripts/gated_sae_experiment.py`). Rajamanoharan-style gated SAE with
 separate gate (Heaviside) and magnitude (ReLU) heads sharing tied

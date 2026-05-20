@@ -38,6 +38,8 @@ import sys
 import traceback
 from html import escape
 
+from econsae.polygram_bridge import efficiency_for_display
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 os.chdir(REPO_ROOT)
@@ -568,8 +570,7 @@ def section_polygram() -> str:
                 f"{escape(r['error'][:60])}</td></tr>"
             )
             continue
-        eff = ("N/A" if r["cancellation_efficiency"] is None
-               else f"{r['cancellation_efficiency']:.1%}")
+        eff = efficiency_for_display(r, fmt=".1%")
         canc_rows.append(
             f"<tr><td><code>{escape(r['label'])}</code></td>"
             f"<td>{escape(' / '.join(r['pair']))}</td>"
