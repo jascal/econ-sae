@@ -586,6 +586,36 @@ def section_polygram() -> str:
         + "".join(canc_rows) + '</tbody></table>'
     )
 
+    # Polygram capacity diagnostics — mirrors sae-forge's
+    # ParetoFrontierRow.polygram_* fields. Defaults handle pre-task-#14
+    # summaries that don't carry the new keys.
+    encoding_capacity = dictionary.get(
+        "polygram_encoding_capacity", 2 ** dictionary["n_qubits"]
+    )
+    n_clusters_total = dictionary.get("polygram_n_clusters", 0)
+    headroom = dictionary.get(
+        "polygram_capacity_headroom", encoding_capacity - dictionary["n_features"]
+    )
+    utilisation = dictionary.get(
+        "polygram_capacity_utilisation",
+        dictionary["n_features"] / encoding_capacity if encoding_capacity > 0 else 0.0,
+    )
+    capacity_table = f"""
+<table class="summary"><thead><tr>
+  <th>n_features</th><th>encoding</th><th>n_qubits</th>
+  <th>capacity (= 2<sup>n_qubits</sup>)</th>
+  <th>headroom</th><th>utilisation</th><th>n_clusters</th>
+</tr></thead><tbody><tr>
+  <td>{dictionary['n_features']}</td>
+  <td><code>{escape(dictionary['encoding'])}</code></td>
+  <td>{dictionary['n_qubits']}</td>
+  <td>{encoding_capacity}</td>
+  <td>{headroom:+d}</td>
+  <td>{utilisation:.1%}</td>
+  <td>{n_clusters_total}</td>
+</tr></tbody></table>
+"""
+
     return f"""
 <section id="polygram">
   <h2>(d) Polygram bridge</h2>
@@ -595,6 +625,14 @@ def section_polygram() -> str:
   no truncation). Per-feature <em>beta</em> = best-recovered AUC minus 0.5,
   so the "interpretability strength" of each feature appears as the scalar
   on the Dictionary slot.</p>
+
+  <h3>Encoding-capacity diagnostics</h3>
+  <p>Compression-style diagnostics mirroring sae-forge's
+  <code>ParetoFrontierRow.polygram_*</code> fields. Headroom = capacity −
+  n_features; positive means under-utilised substrate. utilisation = how
+  much of the encoding's 2<sup>n_qubits</sup> slot space is occupied by
+  real features.</p>
+  {capacity_table}
 
   <h3>Per-tier beta spread</h3>
   {cluster_table}

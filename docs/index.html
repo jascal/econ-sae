@@ -167,8 +167,30 @@ documents what works for each tier.</p>
   so the "interpretability strength" of each feature appears as the scalar
   on the Dictionary slot.</p>
 
+  <h3>Encoding-capacity diagnostics</h3>
+  <p>Compression-style diagnostics mirroring sae-forge's
+  <code>ParetoFrontierRow.polygram_*</code> fields. Headroom = capacity −
+  n_features; positive means under-utilised substrate. utilisation = how
+  much of the encoding's 2<sup>n_qubits</sup> slot space is occupied by
+  real features.</p>
+  
+<table class="summary"><thead><tr>
+  <th>n_features</th><th>encoding</th><th>n_qubits</th>
+  <th>capacity (= 2<sup>n_qubits</sup>)</th>
+  <th>headroom</th><th>utilisation</th><th>n_clusters</th>
+</tr></thead><tbody><tr>
+  <td>52</td>
+  <td><code>HEA_Rung2</code></td>
+  <td>6</td>
+  <td>64</td>
+  <td>+12</td>
+  <td>81.2%</td>
+  <td>52</td>
+</tr></tbody></table>
+
+
   <h3>Per-tier beta spread</h3>
-  <table class="summary"><thead><tr><th>tier</th><th>n</th><th>beta min</th><th>beta median</th><th>beta max</th></tr></thead><tbody><tr><td><code>bucketed</code></td><td>7</td><td>+0.305</td><td>+0.371</td><td>+0.498</td></tr><tr><td><code>categorical</code></td><td>30</td><td>+0.000</td><td>+0.075</td><td>+0.500</td></tr><tr><td><code>conjunctive</code></td><td>8</td><td>+0.424</td><td>+0.488</td><td>+0.500</td></tr><tr><td><code>regime</code></td><td>6</td><td>+0.282</td><td>+0.384</td><td>+0.500</td></tr></tbody></table>
+  <table class="summary"><thead><tr><th>tier</th><th>n</th><th>beta min</th><th>beta median</th><th>beta max</th></tr></thead><tbody><tr><td><code>bucketed</code></td><td>7</td><td>+0.305</td><td>+0.371</td><td>+0.498</td></tr><tr><td><code>categorical</code></td><td>31</td><td>+0.000</td><td>+0.073</td><td>+0.500</td></tr><tr><td><code>conjunctive</code></td><td>8</td><td>+0.424</td><td>+0.488</td><td>+0.500</td></tr><tr><td><code>regime</code></td><td>6</td><td>+0.282</td><td>+0.384</td><td>+0.500</td></tr></tbody></table>
 
   
 <h3>Interference sweep: rotate phase on a cross-tier pair</h3>

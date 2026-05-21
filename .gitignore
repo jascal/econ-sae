@@ -34,8 +34,13 @@ ENV/
 # Ignore everything at runs/ level
 runs/*
 
-# Re-include small summaries for direct readability on GitHub
+# Re-include small summaries for direct readability on GitHub. The
+# top-level pattern catches summaries written directly under runs/;
+# the explicit polygram entry re-includes the bridge's nested summary
+# so future regens land without needing `git add -f` and the published
+# docs/index.html stays in sync with what scripts/visualize.py reads.
 !runs/*_summary.json
+!runs/polygram/polygram_summary.json
 
 # Re-include the Phase 6.2 unified-recipe artifacts: the headline
 # "6/6 regime in a single run" result. World-model + 3 SAE checkpoints
