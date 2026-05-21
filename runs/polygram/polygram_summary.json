@@ -1,0 +1,350 @@
+{
+  "dictionary": {
+    "name": "econ_sae_full",
+    "n_features": 52,
+    "n_qubits": 6,
+    "encoding": "HEA_Rung2",
+    "hierarchy": {
+      "bucketed": [
+        "cash_poor",
+        "cash_rich",
+        "debt_high",
+        "stockout",
+        "lev_high",
+        "mpc_high",
+        "prod_high"
+      ],
+      "categorical": [
+        "cohort_prime",
+        "cohort_retiree",
+        "cohort_young",
+        "firm_sector_durables",
+        "firm_sector_food",
+        "firm_sector_services",
+        "sector_bank",
+        "sector_firm",
+        "sector_government",
+        "sector_household",
+        "shock_fiscal",
+        "shock_monetary",
+        "shock_productivity_aggregate",
+        "shock_sentiment_prime",
+        "shock_sentiment_retiree",
+        "shock_sentiment_young",
+        "shock_tfp_durables",
+        "shock_tfp_food",
+        "shock_tfp_services",
+        "txn_b2b_purchase",
+        "txn_deposit_interest",
+        "txn_dividend",
+        "txn_interest",
+        "txn_loan_origination",
+        "txn_loan_repayment",
+        "txn_purchase_durables",
+        "txn_purchase_food",
+        "txn_purchase_services",
+        "txn_tax",
+        "txn_transfer",
+        "txn_wage"
+      ],
+      "conjunctive": [
+        "durables_firm_high_inv",
+        "firm_AND_indebted_AND_high_inventory",
+        "food_firm_low_inv",
+        "prime_AND_high_cash",
+        "retiree_AND_decumulating",
+        "services_firm_high_output",
+        "young_AND_high_mpc_AND_expansion",
+        "young_AND_indebted"
+      ],
+      "regime": [
+        "phase_contraction",
+        "phase_expansion",
+        "phase_fiscal_active",
+        "phase_high_leverage",
+        "phase_high_rate",
+        "phase_monetary_active"
+      ]
+    },
+    "betas_by_cluster": {
+      "bucketed": {
+        "n": 7,
+        "min": 0.30501890182495117,
+        "median": 0.37094640731811523,
+        "max": 0.4982722997665405
+      },
+      "categorical": {
+        "n": 31,
+        "min": 0.0,
+        "median": 0.0726504921913147,
+        "max": 0.5
+      },
+      "conjunctive": {
+        "n": 8,
+        "min": 0.4238591194152832,
+        "median": 0.4878156781196594,
+        "max": 0.49980229139328003
+      },
+      "regime": {
+        "n": 6,
+        "min": 0.28158700466156006,
+        "median": 0.38369637727737427,
+        "max": 0.5
+      }
+    },
+    "polygram_n_clusters": 52,
+    "polygram_n_zeroed": 0,
+    "polygram_redundancy_ratio": 0.0,
+    "polygram_encoding_capacity": 64,
+    "polygram_capacity_headroom": 12,
+    "polygram_capacity_utilisation": 0.8125
+  },
+  "interference_sweep": {
+    "label": "firm_food_vs_low_inv",
+    "pair": [
+      "firm_sector_food",
+      "food_firm_low_inv"
+    ],
+    "knob": "firm_sector_food.phi",
+    "overlap_min": 0.7703971546129046,
+    "overlap_max": 0.9999999902278267,
+    "overlap_mean": 0.8870318742842657,
+    "n_samples": 60
+  },
+  "cancellations": [
+    {
+      "label": "cat_cat_distant",
+      "pair": [
+        "sector_bank",
+        "firm_sector_food"
+      ],
+      "before_overlap": 0.9999999999999998,
+      "after_overlap": 0.7705238174274406,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "cat_cat_same_axis",
+      "pair": [
+        "firm_sector_food",
+        "firm_sector_durables"
+      ],
+      "before_overlap": 0.9999999999999998,
+      "after_overlap": 0.7705238174274406,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "buck_buck",
+      "pair": [
+        "debt_high",
+        "mpc_high"
+      ],
+      "before_overlap": 0.9920584966362598,
+      "after_overlap": 0.8420563419175662,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "conj_conj",
+      "pair": [
+        "food_firm_low_inv",
+        "young_AND_indebted"
+      ],
+      "before_overlap": 0.9991147348298542,
+      "after_overlap": 0.7951892508165307,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "cat_in_conj",
+      "pair": [
+        "firm_sector_food",
+        "food_firm_low_inv"
+      ],
+      "before_overlap": 0.9999999902278267,
+      "after_overlap": 0.7706068602992246,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "cat_vs_regime",
+      "pair": [
+        "sector_household",
+        "phase_high_leverage"
+      ],
+      "before_overlap": 0.9998425993408591,
+      "after_overlap": 0.7814902022810116,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "regime_regime",
+      "pair": [
+        "phase_high_leverage",
+        "phase_fiscal_active"
+      ],
+      "before_overlap": 0.9998347199396918,
+      "after_overlap": 0.7812340204063741,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "regime_vs_conj",
+      "pair": [
+        "phase_high_leverage",
+        "young_AND_indebted"
+      ],
+      "before_overlap": 0.9997110221092305,
+      "after_overlap": 0.8053797730789841,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    },
+    {
+      "label": "cohort_cohort",
+      "pair": [
+        "cohort_young",
+        "cohort_retiree"
+      ],
+      "before_overlap": 0.9999999906992654,
+      "after_overlap": 0.7706048325468209,
+      "structural_floor": NaN,
+      "cancellation_efficiency": null,
+      "at_structural_floor": false,
+      "tolerance_met": false,
+      "n_evaluations": 1600
+    }
+  ],
+  "feature_aucs": {
+    "cash_bucket:poor": 0.8050189018249512,
+    "cash_bucket:rich": 0.8658782243728638,
+    "cohort:prime": 0.9999955296516418,
+    "cohort:retiree": 1.0,
+    "cohort:young": 0.9998071193695068,
+    "debt_bucket:high": 0.9982722997665405,
+    "durables_firm_high_inv": 0.999570369720459,
+    "firm_AND_indebted_AND_high_inventory": 0.9238591194152832,
+    "firm_sector:durables": 1.0,
+    "firm_sector:food": 1.0,
+    "firm_sector:services": 1.0,
+    "food_firm_low_inv": 0.99980229139328,
+    "inventory_bucket:stockout": 0.9792073369026184,
+    "leverage:high": 0.961217999458313,
+    "mpc_bucket:high": 0.8198053240776062,
+    "phase:contraction": 0.7815870046615601,
+    "phase:expansion": 0.7921710014343262,
+    "phase:fiscal_active": 1.0,
+    "phase:high_leverage": 0.9742870330810547,
+    "phase:high_rate": 0.7931057214736938,
+    "phase:monetary_active": 0.9989719390869141,
+    "prime_AND_high_cash": 0.9885419607162476,
+    "productivity:high": 0.8709464073181152,
+    "retiree_AND_decumulating": 0.944084882736206,
+    "sector:bank": 1.0,
+    "sector:firm": 1.0,
+    "sector:government": 0.9999876618385315,
+    "sector:household": 0.999379575252533,
+    "services_firm_high_output": 0.9997832179069519,
+    "shock_period_has:fiscal": 0.5448403358459473,
+    "shock_period_has:monetary": 0.5090088844299316,
+    "shock_period_has:productivity_aggregate": 0.5322598814964294,
+    "shock_period_has:sentiment_prime": 0.5084667801856995,
+    "shock_period_has:sentiment_retiree": 0.508631706237793,
+    "shock_period_has:sentiment_young": 0.5091026425361633,
+    "shock_period_has:tfp_durables": 0.5126782059669495,
+    "shock_period_has:tfp_food": 0.5104215145111084,
+    "shock_period_has:tfp_services": 0.5173504948616028,
+    "txn_period_has:deposit_interest": 0.6015032529830933,
+    "txn_period_has:dividend": 0.5726504921913147,
+    "txn_period_has:interest": 0.5767078399658203,
+    "txn_period_has:loan_origination": 0.6612081527709961,
+    "txn_period_has:loan_repayment": 0.7163163423538208,
+    "txn_period_has:purchase_durables": 0.5,
+    "txn_period_has:purchase_food": 0.5,
+    "txn_period_has:purchase_services": 0.5,
+    "txn_period_has:tax": 0.5,
+    "txn_period_has:transfer": 0.7901365756988525,
+    "txn_period_has:wage": 0.5,
+    "young_AND_high_mpc_AND_expansion": 0.9870893955230713,
+    "young_AND_indebted": 0.9402866959571838,
+    "txn_period_has:b2b_purchase": 0.5
+  },
+  "name_to_ident": {
+    "cash_bucket:poor": "cash_poor",
+    "cash_bucket:rich": "cash_rich",
+    "cohort:prime": "cohort_prime",
+    "cohort:retiree": "cohort_retiree",
+    "cohort:young": "cohort_young",
+    "debt_bucket:high": "debt_high",
+    "durables_firm_high_inv": "durables_firm_high_inv",
+    "firm_AND_indebted_AND_high_inventory": "firm_AND_indebted_AND_high_inventory",
+    "firm_sector:durables": "firm_sector_durables",
+    "firm_sector:food": "firm_sector_food",
+    "firm_sector:services": "firm_sector_services",
+    "food_firm_low_inv": "food_firm_low_inv",
+    "inventory_bucket:stockout": "stockout",
+    "leverage:high": "lev_high",
+    "mpc_bucket:high": "mpc_high",
+    "phase:contraction": "phase_contraction",
+    "phase:expansion": "phase_expansion",
+    "phase:fiscal_active": "phase_fiscal_active",
+    "phase:high_leverage": "phase_high_leverage",
+    "phase:high_rate": "phase_high_rate",
+    "phase:monetary_active": "phase_monetary_active",
+    "prime_AND_high_cash": "prime_AND_high_cash",
+    "productivity:high": "prod_high",
+    "retiree_AND_decumulating": "retiree_AND_decumulating",
+    "sector:bank": "sector_bank",
+    "sector:firm": "sector_firm",
+    "sector:government": "sector_government",
+    "sector:household": "sector_household",
+    "services_firm_high_output": "services_firm_high_output",
+    "shock_period_has:fiscal": "shock_fiscal",
+    "shock_period_has:monetary": "shock_monetary",
+    "shock_period_has:productivity_aggregate": "shock_productivity_aggregate",
+    "shock_period_has:sentiment_prime": "shock_sentiment_prime",
+    "shock_period_has:sentiment_retiree": "shock_sentiment_retiree",
+    "shock_period_has:sentiment_young": "shock_sentiment_young",
+    "shock_period_has:tfp_durables": "shock_tfp_durables",
+    "shock_period_has:tfp_food": "shock_tfp_food",
+    "shock_period_has:tfp_services": "shock_tfp_services",
+    "txn_period_has:b2b_purchase": "txn_b2b_purchase",
+    "txn_period_has:deposit_interest": "txn_deposit_interest",
+    "txn_period_has:dividend": "txn_dividend",
+    "txn_period_has:interest": "txn_interest",
+    "txn_period_has:loan_origination": "txn_loan_origination",
+    "txn_period_has:loan_repayment": "txn_loan_repayment",
+    "txn_period_has:purchase_durables": "txn_purchase_durables",
+    "txn_period_has:purchase_food": "txn_purchase_food",
+    "txn_period_has:purchase_services": "txn_purchase_services",
+    "txn_period_has:tax": "txn_tax",
+    "txn_period_has:transfer": "txn_transfer",
+    "txn_period_has:wage": "txn_wage",
+    "young_AND_high_mpc_AND_expansion": "young_AND_high_mpc_AND_expansion",
+    "young_AND_indebted": "young_AND_indebted"
+  }
+}
