@@ -366,18 +366,17 @@ def main(feature_aucs: dict[str, float] | None = None,
               f"{r['structural_floor']:>7.4f} {eff:>7s} "
               f"{str(r['tolerance_met']):>5s}")
 
-    # Compression-style capacity diagnostics (mirrors sae-forge's
-    # ParetoFrontierRow extensions from add-polygram-cluster-diagnostics).
+    # Polygram substrate diagnostics (mirrors sae-forge ParetoFrontierRow).
     # econ-sae's polygram path is direct-Dictionary-construction (no
-    # Compressor.apply step), so the analyst-facing diagnostics are the
-    # encoding-capacity headroom (capacity − n_features) and per-tier
-    # cluster counts. The redundancy_ratio and n_zeroed fields that
-    # apply on a compression path are documented as 0.0 / 0 here since
-    # nothing is being zeroed.
+    # `Compressor.apply` step), so n_zeroed and redundancy_ratio are
+    # always 0 / 0.0 here — nothing is being zeroed. The load-bearing
+    # diagnostics are encoding_capacity (= 2^n_qubits for HEA_Rung2),
+    # capacity_headroom (= capacity - n_features), and
+    # capacity_utilisation (= n_features / capacity).
     n_features_kept = len(dictionary.features)
     n_qubits = required_qubits(n_features_kept)
-    encoding_capacity = 2 ** n_qubits   # HEA_Rung2 capacity = 2^n_qubits
-    n_clusters_total = sum(len(members) for members in dictionary.hierarchy.values())
+    encoding_capacity = 2 ** n_qubits
+    n_clusters_total = sum(len(m) for m in dictionary.hierarchy.values())
     headroom = encoding_capacity - n_features_kept
     capacity_utilisation = (
         n_features_kept / encoding_capacity if encoding_capacity > 0 else 0.0
@@ -398,13 +397,11 @@ def main(feature_aucs: dict[str, float] | None = None,
                 }
                 for cluster, betas in betas_by_cluster.items()
             },
-            # Compression-style diagnostics (mirrors sae-forge's
-            # ParetoFrontierRow.polygram_* fields).
-            "polygram_n_clusters":         n_clusters_total,
-            "polygram_n_zeroed":           0,
-            "polygram_redundancy_ratio":   0.0,
-            "polygram_encoding_capacity":  encoding_capacity,
-            "polygram_capacity_headroom":  headroom,
+            "polygram_n_clusters": n_clusters_total,
+            "polygram_n_zeroed": 0,
+            "polygram_redundancy_ratio": 0.0,
+            "polygram_encoding_capacity": encoding_capacity,
+            "polygram_capacity_headroom": headroom,
             "polygram_capacity_utilisation": capacity_utilisation,
         },
         "interference_sweep": sweep_result,
