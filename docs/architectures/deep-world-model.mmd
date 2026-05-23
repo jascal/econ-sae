@@ -1,0 +1,23 @@
+%% architecture DeepWorldModel
+flowchart TD
+    x(("x<br/>[input]"))
+    fc1["fc1<br/>Linear(input_dim, h1_dim)"]
+    act1["act1<br/>ReLU()"]
+    fc2["fc2<br/>Linear(h1_dim, h2_dim)"]
+    act2["act2<br/>ReLU()"]
+    fc3["fc3<br/>Linear(h2_dim, h3_dim)"]
+    act3["act3<br/>ReLU()"]
+    head["head<br/>Linear(h3_dim, out_dim)"]
+    y(("y<br/>[output]"))
+    x -- "x1 : (B,input_dim)" --> fc1
+    fc1 -- "z1 : (B,h1_dim)" --> act1
+    act1 -- "x2 : (B,h1_dim)" --> fc2
+    fc2 -- "z2 : (B,h2_dim)" --> act2
+    act2 -- "x3 : (B,h2_dim)" --> fc3
+    fc3 -- "z3 : (B,h3_dim)" --> act3
+    act3 -- "h_last : (B,h3_dim)" --> head
+    head -- "y_hat : (B,out_dim)" --> y
+    classDef input fill:#dbeafe,stroke:#1e40af,color:#1e3a8a;
+    class x input;
+    classDef output fill:#dcfce7,stroke:#166534,color:#14532d;
+    class y output;
