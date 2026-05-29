@@ -61,6 +61,11 @@ runs/regime_dual_head_experiment/*
 !runs/forge/**
 runs/forge/**/sae.safetensors
 runs/forge/**/validation_report.json
+# The forged synthetic model weights are regeneratable from the tracked
+# sae.compressed.safetensors via ForgePipeline.run_synthetic(). Keep the
+# tiny forge_result.json + forged/config.json (readable on GitHub), drop
+# the weights -- same treatment as the input sae.safetensors above.
+runs/forge/**/forged_synthetic/forged/model.safetensors
 
 # Generated data bundles -- checked in by default so the repo is usable
 # without running scripts/build_data.py first. Comment these in to track

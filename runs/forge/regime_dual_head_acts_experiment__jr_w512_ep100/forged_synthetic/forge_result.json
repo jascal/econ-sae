@@ -1,0 +1,11 @@
+{
+  "host_model_id": "<in-memory>",
+  "n_params": 212124,
+  "faithfulness": 0.7836839556694031,
+  "faithfulness_target_name": "next_state_mse",
+  "faithfulness_kl": null,
+  "positional_encoding": "rotary",
+  "n_features": 437,
+  "scale_compression_ratio": 1.0000000139988574,
+  "attention_width": "host"
+}
