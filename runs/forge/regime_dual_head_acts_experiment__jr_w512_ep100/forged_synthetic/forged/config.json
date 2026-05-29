@@ -1,0 +1,17 @@
+{
+  "family": "econsae_temporal_wm",
+  "n_features": 437,
+  "agent_dim": 23,
+  "macro_dim": 10,
+  "shock_dim": 10,
+  "embed_dim": 64,
+  "n_heads": 4,
+  "n_attn_layers": 1,
+  "gru_hidden": 128,
+  "n_gru_layers": 1,
+  "h2_dim": 128,
+  "n_regime_labels": 6,
+  "tied_embeddings": false,
+  "rope_mode": "standard",
+  "forward_mode": "native_in_basis"
+}
