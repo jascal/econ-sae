@@ -47,6 +47,7 @@ from econsae.calibration.optimize import (
     calibrate,
     multistart_calibrate,
 )
+from econsae.calibration.sensitivity import MorrisResult, morris_screening
 
 __all__ = [
     "BehavioralParams",
@@ -59,4 +60,6 @@ __all__ = [
     "MultiStartResult",
     "calibrate",
     "multistart_calibrate",
+    "MorrisResult",
+    "morris_screening",
 ]
