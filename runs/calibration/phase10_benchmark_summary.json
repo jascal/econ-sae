@@ -1,0 +1,200 @@
+{
+  "budget": {
+    "n_traj": 64,
+    "n_periods": 100,
+    "wm_epochs": 40,
+    "sae_epochs": 100
+  },
+  "sentiment_strength": 0.2,
+  "arms": [
+    {
+      "label": "baseline",
+      "config": {
+        "shock": {
+          "tfp_ar": 0.7,
+          "tfp_factor_vol": 0.04,
+          "tfp_idio_vol": 0.02,
+          "sentiment_ar": 0.6,
+          "sentiment_factor_vol": 0.03,
+          "sentiment_idio_vol": 0.015,
+          "monetary_prob": 0.1,
+          "monetary_step": 0.01,
+          "base_interest_rate": 0.02,
+          "fiscal_prob": 0.08,
+          "fiscal_impulse": 0.4,
+          "agg_tfp_prob": 0.02,
+          "agg_tfp_size": 0.1
+        },
+        "behavioral": {
+          "sentiment_strength": 0.2,
+          "repayment_rate": 0.1,
+          "deposit_rate_spread": 0.3
+        }
+      },
+      "base_rate": 0.02,
+      "monetary_step": 0.01,
+      "moments": {
+        "gdp_growth_mean": -0.004769548324556216,
+        "gdp_growth_vol": 0.09647157440494075,
+        "gdp_growth_ac1": 0.40339354072863054,
+        "recession_freq": 0.2916666666666667,
+        "fedfunds_mean": 0.0245078125,
+        "fedfunds_vol": 0.0176159090445212,
+        "inflation_mean": -0.002546961926308979,
+        "inflation_vol": 0.04004265707335458,
+        "debt_to_money": 0.11030916417723169
+      },
+      "regime_label_prevalence": {
+        "phase:contraction": 0.2887499928474426,
+        "phase:expansion": 0.2462500035762787,
+        "phase:fiscal_active": 0.08124999701976776,
+        "phase:high_leverage": 0.546093761920929,
+        "phase:high_rate": 0.25562500953674316,
+        "phase:monetary_active": 0.10578124970197678
+      },
+      "per_tier": {
+        "categorical": {
+          "n_features": 31,
+          "coverage_0.95": 0.2903225806451613,
+          "coverage_0.90": 0.3548387096774194,
+          "mean_best_auc": 0.7233821749687195
+        },
+        "bucketed": {
+          "n_features": 7,
+          "coverage_0.95": 0.14285714285714285,
+          "coverage_0.90": 0.42857142857142855,
+          "mean_best_auc": 0.8668304085731506
+        },
+        "conjunctive": {
+          "n_features": 8,
+          "coverage_0.95": 0.375,
+          "coverage_0.90": 0.75,
+          "mean_best_auc": 0.9330406785011292
+        },
+        "regime": {
+          "n_features": 6,
+          "coverage_0.95": 0.3333333333333333,
+          "coverage_0.90": 0.6666666666666666,
+          "mean_best_auc": 0.8826006054878235
+        }
+      },
+      "coverage_0.95": 0.28846153846153844,
+      "mean_best_auc": 0.793319046497345,
+      "regime_auc_per_feature": {
+        "phase:contraction": 0.8804508447647095,
+        "phase:expansion": 0.9217153787612915,
+        "phase:fiscal_active": 0.9992914199829102,
+        "phase:high_leverage": 0.9226316809654236,
+        "phase:high_rate": 0.9996698498725891,
+        "phase:monetary_active": 0.5718444585800171
+      },
+      "wall_seconds": 352.30190920829773
+    },
+    {
+      "label": "calibrated",
+      "config": {
+        "shock": {
+          "tfp_ar": 0.4906026893031219,
+          "tfp_factor_vol": 0.012444475207293595,
+          "tfp_idio_vol": 0.029833996582649118,
+          "sentiment_ar": 0.6,
+          "sentiment_factor_vol": 0.015282486010586925,
+          "sentiment_idio_vol": 0.015,
+          "monetary_prob": 0.3960822224924589,
+          "monetary_step": 0.02746759768013932,
+          "base_interest_rate": 0.008861794448270378,
+          "fiscal_prob": 0.029162840895961772,
+          "fiscal_impulse": 0.4,
+          "agg_tfp_prob": 0.02,
+          "agg_tfp_size": 0.1
+        },
+        "behavioral": {
+          "sentiment_strength": 0.2,
+          "repayment_rate": 0.1,
+          "deposit_rate_spread": 0.3
+        }
+      },
+      "base_rate": 0.008861794448270378,
+      "monetary_step": 0.02746759768013932,
+      "moments": {
+        "gdp_growth_mean": 0.0003347338280188086,
+        "gdp_growth_vol": 0.09570385205900354,
+        "gdp_growth_ac1": 0.4067648181992821,
+        "recession_freq": 0.2776199494949495,
+        "fedfunds_mean": 0.09217792102001363,
+        "fedfunds_vol": 0.08544160009196883,
+        "inflation_mean": -0.0031090665749716573,
+        "inflation_vol": 0.02254079469978944,
+        "debt_to_money": 0.12638454500075835
+      },
+      "regime_label_prevalence": {
+        "phase:contraction": 0.2748437523841858,
+        "phase:expansion": 0.28328123688697815,
+        "phase:fiscal_active": 0.028593750670552254,
+        "phase:high_leverage": 0.7082812786102295,
+        "phase:high_rate": 0.6395312547683716,
+        "phase:monetary_active": 0.3995312452316284
+      },
+      "per_tier": {
+        "categorical": {
+          "n_features": 31,
+          "coverage_0.95": 0.3225806451612903,
+          "coverage_0.90": 0.45161290322580644,
+          "mean_best_auc": 0.757649838924408
+        },
+        "bucketed": {
+          "n_features": 7,
+          "coverage_0.95": 0.2857142857142857,
+          "coverage_0.90": 0.42857142857142855,
+          "mean_best_auc": 0.8769765496253967
+        },
+        "conjunctive": {
+          "n_features": 8,
+          "coverage_0.95": 0.375,
+          "coverage_0.90": 0.75,
+          "mean_best_auc": 0.9383461475372314
+        },
+        "regime": {
+          "n_features": 6,
+          "coverage_0.95": 0.3333333333333333,
+          "coverage_0.90": 0.5,
+          "mean_best_auc": 0.9039446711540222
+        }
+      },
+      "coverage_0.95": 0.3269230769230769,
+      "mean_best_auc": 0.8183927536010742,
+      "regime_auc_per_feature": {
+        "phase:contraction": 0.7876119017601013,
+        "phase:expansion": 0.8786009550094604,
+        "phase:fiscal_active": 0.9994625449180603,
+        "phase:high_leverage": 0.9647576808929443,
+        "phase:high_rate": 0.8897877931594849,
+        "phase:monetary_active": 0.903447151184082
+      },
+      "wall_seconds": 372.0721471309662
+    }
+  ],
+  "tier_comparison": {
+    "categorical": {
+      "baseline_mAUC": 0.7233821749687195,
+      "calibrated_mAUC": 0.757649838924408,
+      "delta": 0.03426766395568848
+    },
+    "bucketed": {
+      "baseline_mAUC": 0.8668304085731506,
+      "calibrated_mAUC": 0.8769765496253967,
+      "delta": 0.010146141052246094
+    },
+    "conjunctive": {
+      "baseline_mAUC": 0.9330406785011292,
+      "calibrated_mAUC": 0.9383461475372314,
+      "delta": 0.005305469036102295
+    },
+    "regime": {
+      "baseline_mAUC": 0.8826006054878235,
+      "calibrated_mAUC": 0.9039446711540222,
+      "delta": 0.02134406566619873
+    }
+  },
+  "wall_seconds": 724.8502097129822
+}

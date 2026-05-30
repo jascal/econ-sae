@@ -1,0 +1,30 @@
+{
+  "shock": {
+    "tfp_ar": 0.4906026893031219,
+    "tfp_factor_vol": 0.012444475207293595,
+    "tfp_idio_vol": 0.029833996582649118,
+    "sentiment_ar": 0.6,
+    "sentiment_factor_vol": 0.015282486010586925,
+    "sentiment_idio_vol": 0.015,
+    "monetary_prob": 0.3960822224924589,
+    "monetary_step": 0.02746759768013932,
+    "base_interest_rate": 0.008861794448270378,
+    "fiscal_prob": 0.029162840895961772,
+    "fiscal_impulse": 0.4,
+    "agg_tfp_prob": 0.02,
+    "agg_tfp_size": 0.1
+  },
+  "behavioral": {
+    "sentiment_strength": 0.0,
+    "repayment_rate": 0.1,
+    "deposit_rate_spread": 0.3
+  },
+  "_meta": {
+    "source": "scripts/calibrate.py",
+    "targets": "data/macro_targets_us.json",
+    "budget": "fast",
+    "method": "differential_evolution",
+    "objective": 30.855835659279055,
+    "baseline_objective": 54.564592038474366
+  }
+}
