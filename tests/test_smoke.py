@@ -233,3 +233,88 @@ def test_feed_builders_align_with_gt_matrix():
     # Y is binary
     import numpy as np
     assert ((fr.Y == 0) | (fr.Y == 1)).all()
+
+
+# ---- Phase 10: calibration ------------------------------------------------
+import os
+
+_TARGETS_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data", "macro_targets_us.json",
+)
+
+
+def test_price_level_macro_present():
+    """The Phase 10 inflation series: mean firm price, additive macro key."""
+    econ = Economy.small()
+    traj = econ.rollout(n_periods=12)
+    assert all("price_level" in m for m in traj.macros)
+    assert all(m["price_level"] > 0 for m in traj.macros)
+
+
+def test_compute_moments_on_known_series():
+    from econsae.calibration import compute_moments
+    T = 10
+    gdp = np.full((2, T), 100.0)                       # constant -> zero growth
+    price = np.tile(1.01 ** np.arange(T), (2, 1))      # +1% per period
+    rate = np.full((2, T), 0.03)
+    debt = np.full((2, T), 20.0)
+    money = np.full((2, T), 100.0)
+    m = compute_moments({
+        "GDP": gdp, "price_level": price, "interest_rate": rate,
+        "debt_outstanding": debt, "money_stock": money,
+    })
+    assert abs(m["gdp_growth_mean"]) < 1e-9
+    assert m["gdp_growth_vol"] < 1e-9
+    assert m["recession_freq"] == 0.0                  # constant GDP never contracts
+    assert abs(m["inflation_mean"] - np.log(1.01)) < 1e-6
+    assert abs(m["fedfunds_mean"] - 0.03) < 1e-9
+    assert m["fedfunds_vol"] < 1e-9
+    assert abs(m["debt_to_money"] - 0.2) < 1e-9
+
+
+def test_moment_distance_zero_at_target():
+    from econsae.calibration import moment_distance
+    tgt = {"a": 0.5, "b": 0.02}
+    assert moment_distance(tgt, tgt) == 0.0
+    # weight-0 moments are ignored even when far off
+    assert moment_distance({"a": 999.0}, {"a": 0.0}, weights={"a": 0.0}) == 0.0
+
+
+def test_sim_config_defaults_match_draw_shock_and_roundtrip():
+    import inspect
+    from econsae.calibration import SimConfig
+    from econsae.simulator import shocks as S
+    defaults = {
+        k: v.default
+        for k, v in inspect.signature(S.draw_shock_schedule).parameters.items()
+        if v.default is not inspect.Parameter.empty and k not in ("n_periods", "seed")
+    }
+    assert SimConfig.default().shock_kwargs() == defaults
+    # nested dict round-trip
+    cfg = SimConfig.default()
+    assert SimConfig.from_dict(cfg.to_dict()) == cfg
+
+
+def test_generate_ensemble_backcompat_byte_identical():
+    """Default path must be byte-identical to passing SimConfig.default()."""
+    from econsae.calibration import SimConfig
+    a = generate_ensemble(n_trajectories=4, n_periods=20, seed=1)
+    b = generate_ensemble(n_trajectories=4, n_periods=20, seed=1,
+                          sim_config=SimConfig.default())
+    assert np.array_equal(a.stack_all_states(), b.stack_all_states())
+    assert [s.kinds for s in a.shock_schedules] == [s.kinds for s in b.shock_schedules]
+
+
+def test_calibration_smoke_improves_objective(tmp_path):
+    """A tiny calibration run returns a valid config no worse than baseline."""
+    from econsae.calibration import calibrate, SimConfig
+    r = calibrate(_TARGETS_PATH, n_traj=4, n_periods=30, seeds=(0, 1),
+                  method="random", maxiter=2, popsize=4)
+    assert isinstance(r.config, SimConfig)
+    assert r.n_evals > 0
+    assert r.objective <= r.baseline_objective + 1e-9
+    # fitted config serializes and round-trips
+    out = tmp_path / "fit.json"
+    r.config.to_json(str(out))
+    assert SimConfig.from_json(str(out)) == r.config

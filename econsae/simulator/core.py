@@ -790,6 +790,11 @@ class Economy:
             "inventory_food": float(X[:, COORD_IDX["inv_food"]].sum()),
             "inventory_services": float(X[:, COORD_IDX["inv_services"]].sum()),
             "inventory_durables": float(X[:, COORD_IDX["inv_durables"]].sum()),
+            # Mean firm price -- the price level for an inflation series.
+            # Same aggregation the Taylor-rule inflation calc uses (see
+            # `_price_history`, ~line 688). Additive macro key; calibration
+            # consumes it as `macro_price_level` in the ensemble bundle.
+            "price_level": float(np.mean([f.get("price") for f in firms])) if firms else 1.0,
             "interest_rate": float(self.interest_rate()),
             "period": int(self.period),
         }

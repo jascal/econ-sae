@@ -10,11 +10,15 @@ that period as part of the ground-truth feature vocabulary.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from econsae.simulator.core import Economy, Trajectory, check_conservation
 from econsae.simulator.shocks import draw_shock_schedule, ShockSchedule
+
+if TYPE_CHECKING:
+    from econsae.calibration.config import SimConfig
 
 
 @dataclass
@@ -52,6 +56,7 @@ def generate_ensemble(
     taylor_pi_weight: float = 0.5,
     taylor_y_weight: float = 0.5,
     io_network: bool = False,
+    sim_config: "SimConfig | None" = None,
 ) -> Ensemble:
     """Generate an ensemble of trajectories with reproducible seeded shocks.
 
@@ -62,10 +67,29 @@ def generate_ensemble(
     simulator is fully Markovian conditional on agent state -- backward
     compatible with all Phase 1 / 1.5 experiments.
 
+    `sim_config` (Phase 10) is an optional `SimConfig` bundling the
+    calibratable shock-schedule and behavioral parameters. When supplied it
+    is the source of truth for the parameters it covers: its shock kwargs
+    are forwarded to `draw_shock_schedule` (previously unreachable from this
+    layer), its behavioral knobs (`sentiment_strength`, `repayment_rate`,
+    `deposit_rate_spread`) are set on each `Economy`, and its
+    `base_interest_rate` becomes the initial bank rate so the policy-rate
+    floor and starting level stay consistent. When `sim_config is None` the
+    call path is byte-identical to the pre-Phase-10 behavior.
+
     Each trajectory uses a derived seed (seed + traj_index) so that
     re-running with the same outer seed gives identical results, and
     trajectories within a run are independent.
     """
+    shock_kwargs: dict = {}
+    if sim_config is not None:
+        shock_kwargs = sim_config.shock_kwargs()
+        beh = sim_config.behavioral_kwargs()
+        sentiment_strength = beh["sentiment_strength"]
+        # base_interest_rate is the floor used by the shock schedule; align
+        # the Economy's initial rate to it so the two never disagree.
+        interest_rate = shock_kwargs["base_interest_rate"]
+
     ens = Ensemble()
     for k in range(n_trajectories):
         sub_seed = seed * 7919 + k * 17 + 1
@@ -79,7 +103,10 @@ def generate_ensemble(
         econ.taylor_pi_weight = taylor_pi_weight
         econ.taylor_y_weight = taylor_y_weight
         econ.io_network = io_network
-        sched = draw_shock_schedule(n_periods=n_periods, seed=sub_seed)
+        if sim_config is not None:
+            econ.repayment_rate = beh["repayment_rate"]
+            econ.deposit_rate_spread = beh["deposit_rate_spread"]
+        sched = draw_shock_schedule(n_periods=n_periods, seed=sub_seed, **shock_kwargs)
         traj = econ.rollout(n_periods=n_periods, shocks=sched.shocks)
         ens.trajectories.append(traj)
         ens.shock_schedules.append(sched)
