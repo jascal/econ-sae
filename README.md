@@ -1499,14 +1499,18 @@ the full alignment matrix and per-tier metrics are written to
   dynamics in real macro statistics. (Absolute mAUCs sit below the Phase
   9.2.1 headline 0.959 because this is a reduced-budget controlled A/B --
   the calibrated-vs-baseline *delta* is the result, not the absolute level.)
-  Tooling: `scripts/refresh_macro_targets.py` regenerates the targets from
-  local FRED CSV downloads offline (same moment formulas as the simulator
-  side), and `scripts/calibration_identifiability.py` runs the fit from
-  several optimizer seeds to flag weakly-identified knobs -- the volatility
-  params (`tfp_factor_vol`, `sentiment_factor_vol`) are tightly pinned while
-  `monetary_prob` / `monetary_step` trade off against each other (they hit
-  the same rate moments), the expected underdetermination of a
-  more-params-than-moments fit.
+  Tooling: [`scripts/refresh_macro_targets.py`](scripts/refresh_macro_targets.py)
+  regenerates the targets from local FRED CSV downloads offline (same moment
+  formulas as the simulator side), and
+  [`scripts/calibration_identifiability.py`](scripts/calibration_identifiability.py)
+  runs the fit from several optimizer seeds and reports each knob's spread
+  (plus a per-pair correlation matrix). The volatility params
+  (`tfp_factor_vol`, `sentiment_factor_vol`) are tightly pinned (< 4% of
+  their range) while `monetary_prob` / `monetary_step` are weakly identified
+  (their fits wander over a quarter-to-a-third of their bounds) -- the
+  expected underdetermination of a more-params-than-moments fit. (The
+  correlation matrix is the right tool to inspect *which* knobs trade off;
+  at a small start count those off-diagonals are themselves noisy.)
 - **Phase 10+**: LLM-augmented agents.
 
 ## Acknowledgements

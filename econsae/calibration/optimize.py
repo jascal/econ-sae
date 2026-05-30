@@ -218,6 +218,21 @@ def calibrate(
     )
 
 
+# Identifiability classification thresholds (std as a fraction of the
+# parameter's bound range). Emitted in the report so they are explicit and
+# tunable rather than hidden magic numbers.
+IDENTIFIABILITY_WELL = 0.10      # spread below this -> well-identified
+IDENTIFIABILITY_WEAK = 0.25      # spread above this -> weakly identified
+
+
+def _classify_spread(spread_frac: float) -> str:
+    if spread_frac < IDENTIFIABILITY_WELL:
+        return "well"
+    if spread_frac > IDENTIFIABILITY_WEAK:
+        return "weak"
+    return "moderate"
+
+
 @dataclass
 class MultiStartResult:
     """Spread of independent calibration fits -> parameter identifiability.
@@ -254,24 +269,47 @@ class MultiStartResult:
                 "bound_lo": lo,
                 "bound_hi": hi,
                 "spread_frac": spread_frac,                 # std as fraction of range
-                # crude identifiability label for quick scanning
-                "identifiability": ("well" if spread_frac < 0.10
-                                    else "weak" if spread_frac > 0.25
-                                    else "moderate"),
+                "identifiability": _classify_spread(spread_frac),
             })
         return rows
 
+    def param_correlation(self) -> dict:
+        """Pearson correlation of fitted values across starts, per param pair.
+
+        Surfaces tradeoffs: weakly-identified knobs that compensate for each
+        other (e.g. monetary_prob vs monetary_step, hitting the same rate
+        moments) show up as strong off-diagonal correlation. Constant columns
+        (a param that never moved) yield 0. Noisy at small `n_starts`.
+        """
+        if len(self.starts) < 2:
+            return {}
+        P = np.array([[s["params"][n] for n in self.param_names]
+                      for s in self.starts], dtype=np.float64)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            C = np.corrcoef(P, rowvar=False)
+        C = np.nan_to_num(np.atleast_2d(C), nan=0.0)
+        return {a: {b: float(C[i, j]) for j, b in enumerate(self.param_names)}
+                for i, a in enumerate(self.param_names)}
+
     def to_report(self) -> dict:
         objs = [s["objective"] for s in self.starts]
+        best = min(self.starts, key=lambda s: s["objective"]) if self.starts else None
         return {
             "n_starts": len(self.starts),
             "objective": {
                 "min": float(min(objs)), "max": float(max(objs)),
                 "mean": float(np.mean(objs)), "std": float(np.std(objs)),
             },
+            "best_start": best,
+            "thresholds": {
+                "well_below": IDENTIFIABILITY_WELL,
+                "weak_above": IDENTIFIABILITY_WEAK,
+                "metric": "std of fitted value as a fraction of the bound range",
+            },
             "param_names": self.param_names,
             "bounds": {k: list(v) for k, v in self.bounds.items()},
             "identifiability": self.identifiability_table(),
+            "param_correlation": self.param_correlation(),
             "starts": self.starts,
         }
 

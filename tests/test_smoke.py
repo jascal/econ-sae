@@ -332,4 +332,29 @@ def test_multistart_identifiability_structure():
         assert r["bound_lo"] <= r["mean"] <= r["bound_hi"]
         assert r["spread_frac"] >= 0.0
         assert r["identifiability"] in ("well", "moderate", "weak")
-    assert "identifiability" in res.to_report()
+    report = res.to_report()
+    assert "identifiability" in report
+    # thresholds are emitted explicitly, and the correlation matrix is square
+    assert {"well_below", "weak_above"} <= set(report["thresholds"])
+    corr = report["param_correlation"]
+    assert set(corr) == set(res.param_names)
+    for a in res.param_names:
+        assert abs(corr[a][a] - 1.0) < 1e-9 or corr[a][a] == 0.0   # 0 if constant col
+
+
+def test_refresh_macro_targets_parsing(tmp_path):
+    """FRED CSV parsing: missing values skipped, monthly->quarterly mean."""
+    from scripts.refresh_macro_targets import _read_fred_csv, _to_quarterly
+    p = tmp_path / "s.csv"
+    p.write_text("observation_date,X\n1990-01-01,1.0\n1990-02-01,.\n"
+                 "1990-03-01,3.0\n1990-04-01,5.0\n")
+    rec = _read_fred_csv(str(p))
+    assert (1990, 2) not in rec                          # missing "." skipped
+    assert rec[(1990, 1)] == 1.0 and rec[(1990, 3)] == 3.0
+    q = _to_quarterly(rec)
+    assert abs(q[(1990, 1)] - 2.0) < 1e-9                # mean(1.0, 3.0)
+    assert abs(q[(1990, 2)] - 5.0) < 1e-9
+    # all-missing series -> empty dict (graceful)
+    p2 = tmp_path / "empty.csv"
+    p2.write_text("observation_date,X\n1990-01-01,.\n1990-02-01,NaN\n")
+    assert _read_fred_csv(str(p2)) == {}

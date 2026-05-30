@@ -45,6 +45,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", choices=list(BUDGETS), default="standard")
     ap.add_argument("--starts", type=int, default=6)
+    ap.add_argument("--seed", type=int, default=0,
+                    help="first optimizer seed; starts use seed..seed+starts-1")
     ap.add_argument("--method", default="differential_evolution",
                     choices=["differential_evolution", "nelder-mead", "random"])
     ap.add_argument("--targets", default=os.path.join("data", "macro_targets_us.json"))
@@ -52,12 +54,12 @@ def main():
 
     budget = BUDGETS[args.budget]
     print("=" * 78)
-    print(f"Calibration identifiability | {args.starts} starts | "
+    print(f"Calibration identifiability | {args.starts} starts (seed0={args.seed}) | "
           f"budget={args.budget} method={args.method}")
     print("=" * 78)
 
     res = multistart_calibrate(args.targets, n_starts=args.starts,
-                               method=args.method, **budget)
+                               start_seed0=args.seed, method=args.method, **budget)
     report = res.to_report()
 
     objs = report["objective"]
@@ -75,6 +77,14 @@ def main():
             if r["identifiability"] == "weak"]
     print(f"\nweakly-identified (spread > 25% of range): "
           f"{', '.join(weak) if weak else '(none)'}")
+
+    # Strongest cross-param tradeoff among the fits (|corr|), if any.
+    corr = res.param_correlation()
+    pairs = [(a, b, corr[a][b]) for i, a in enumerate(res.param_names)
+             for j, b in enumerate(res.param_names) if j > i]
+    if pairs:
+        a, b, c = max(pairs, key=lambda t: abs(t[2]))
+        print(f"strongest tradeoff across starts: {a} <-> {b}  (corr={c:+.2f})")
 
     os.makedirs(REPORT_DIR, exist_ok=True)
     out_path = os.path.join(REPORT_DIR, "identifiability_summary.json")
