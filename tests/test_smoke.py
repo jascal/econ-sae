@@ -318,3 +318,18 @@ def test_calibration_smoke_improves_objective(tmp_path):
     out = tmp_path / "fit.json"
     r.config.to_json(str(out))
     assert SimConfig.from_json(str(out)) == r.config
+
+
+def test_multistart_identifiability_structure():
+    """Multi-start fit returns per-param spread over the calibrated knobs."""
+    from econsae.calibration import multistart_calibrate
+    res = multistart_calibrate(_TARGETS_PATH, n_starts=2, n_traj=4, n_periods=30,
+                               seeds=(0, 1), method="random", maxiter=2, popsize=3)
+    assert len(res.starts) == 2
+    table = res.identifiability_table()
+    assert {r["param"] for r in table} == set(res.param_names)
+    for r in table:
+        assert r["bound_lo"] <= r["mean"] <= r["bound_hi"]
+        assert r["spread_frac"] >= 0.0
+        assert r["identifiability"] in ("well", "moderate", "weak")
+    assert "identifiability" in res.to_report()

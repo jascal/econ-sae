@@ -216,3 +216,94 @@ def calibrate(
         trace=trace,
         wall_seconds=wall,
     )
+
+
+@dataclass
+class MultiStartResult:
+    """Spread of independent calibration fits -> parameter identifiability.
+
+    The moment-matching problem is underdetermined (more params than moments),
+    so several parameter vectors hit nearly the same objective. Running the
+    fit from independent optimizer seeds and looking at where each param lands
+    reveals which knobs are well-determined (tight spread) and which are not
+    (spread fills their bound range).
+    """
+    param_names: list[str]
+    bounds: dict[str, tuple[float, float]]
+    starts: list[dict]                       # per start: seed, objective, params
+    target_moments: dict[str, float]
+
+    def identifiability_table(self) -> list[dict]:
+        """Per-param stats. `spread_frac` = std / bound-range; high => weak."""
+        default_flat = SimConfig.default().flat()
+        rows = []
+        for name in self.param_names:
+            vals = np.array([s["params"][name] for s in self.starts], dtype=np.float64)
+            lo, hi = self.bounds[name]
+            rng = max(hi - lo, 1e-12)
+            std = float(vals.std())
+            mean = float(vals.mean())
+            spread_frac = std / rng
+            rows.append({
+                "param": name,
+                "default": float(default_flat[name]),
+                "mean": mean,
+                "std": std,
+                "min": float(vals.min()),
+                "max": float(vals.max()),
+                "bound_lo": lo,
+                "bound_hi": hi,
+                "spread_frac": spread_frac,                 # std as fraction of range
+                # crude identifiability label for quick scanning
+                "identifiability": ("well" if spread_frac < 0.10
+                                    else "weak" if spread_frac > 0.25
+                                    else "moderate"),
+            })
+        return rows
+
+    def to_report(self) -> dict:
+        objs = [s["objective"] for s in self.starts]
+        return {
+            "n_starts": len(self.starts),
+            "objective": {
+                "min": float(min(objs)), "max": float(max(objs)),
+                "mean": float(np.mean(objs)), "std": float(np.std(objs)),
+            },
+            "param_names": self.param_names,
+            "bounds": {k: list(v) for k, v in self.bounds.items()},
+            "identifiability": self.identifiability_table(),
+            "starts": self.starts,
+        }
+
+
+def multistart_calibrate(
+    targets_path: str,
+    *,
+    n_starts: int = 6,
+    start_seed0: int = 0,
+    **calibrate_kwargs,
+) -> MultiStartResult:
+    """Run `calibrate` from `n_starts` independent optimizer seeds.
+
+    Extra kwargs (n_traj, n_periods, seeds, method, maxiter, popsize, ...) are
+    forwarded to `calibrate`. The ensemble eval seeds stay fixed across starts
+    (so the objective surface is identical); only the optimizer's own RNG
+    (`de_seed`) varies, isolating optimizer-induced spread from sampling noise.
+    """
+    starts: list[dict] = []
+    param_names: list[str] = []
+    bounds: dict = {}
+    target: dict = {}
+    for i in range(n_starts):
+        r = calibrate(targets_path, de_seed=start_seed0 + i, **calibrate_kwargs)
+        param_names = r.param_names
+        bounds = r.bounds
+        target = r.target_moments
+        flat = r.config.flat()
+        starts.append({
+            "de_seed": start_seed0 + i,
+            "objective": r.objective,
+            "params": {k: float(flat[k]) for k in r.param_names},
+        })
+    return MultiStartResult(param_names=param_names, bounds=bounds,
+                            starts=starts, target_moments=target)
