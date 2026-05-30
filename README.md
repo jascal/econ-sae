@@ -1499,6 +1499,10 @@ the full alignment matrix and per-tier metrics are written to
   dynamics in real macro statistics. (Absolute mAUCs sit below the Phase
   9.2.1 headline 0.959 because this is a reduced-budget controlled A/B --
   the calibrated-vs-baseline *delta* is the result, not the absolute level.)
+  The standard Phase 1 benchmark also takes the calibrated arm opt-in:
+  `train_all.py --calibrated configs/calibrated_macro.json` (writes
+  `__calibrated`-suffixed checkpoints) and `evaluate.py --calibrated ...`
+  scores them and prints a baseline-vs-calibrated per-tier mAUC table.
   Tooling: [`scripts/refresh_macro_targets.py`](scripts/refresh_macro_targets.py)
   regenerates the targets from local FRED CSV downloads offline (same moment
   formulas as the simulator side), and

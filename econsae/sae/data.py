@@ -49,9 +49,17 @@ class Feed:
     def D(self) -> int: return self.X.shape[1]
 
 
-def feed_raw(ens: Ensemble) -> Feed:
-    """Per-(traj, period, agent) state vectors, R^23. Sanity-check feed."""
-    fm: FeatureMatrix = build_feature_matrix(ens.trajectories, ens.shock_schedules)
+def feed_raw(ens: Ensemble, base_rate: float = 0.02,
+             monetary_step: float = 0.01) -> Feed:
+    """Per-(traj, period, agent) state vectors, R^23. Sanity-check feed.
+
+    `base_rate` / `monetary_step` set the `phase:high_rate` /
+    `phase:contraction` label thresholds (Phase 10); pass the calibrated
+    values when the ensemble was built from a calibrated `SimConfig`.
+    """
+    fm: FeatureMatrix = build_feature_matrix(
+        ens.trajectories, ens.shock_schedules,
+        base_rate=base_rate, monetary_step=monetary_step)
     X = torch.tensor(fm.X, dtype=torch.float32)
     return Feed(
         name="raw",
@@ -63,7 +71,8 @@ def feed_raw(ens: Ensemble) -> Feed:
     )
 
 
-def feed_embedded(ens: Ensemble, embed_dim: int = 12, seed: int = 0) -> Feed:
+def feed_embedded(ens: Ensemble, embed_dim: int = 12, seed: int = 0,
+                  base_rate: float = 0.02, monetary_step: float = 0.01) -> Feed:
     """Random-projection feed: simulates residual-stream superposition.
 
     Each sample x in R^DIM gets multiplied by a random linear map W in
@@ -71,7 +80,9 @@ def feed_embedded(ens: Ensemble, embed_dim: int = 12, seed: int = 0) -> Feed:
     features that were one-hot-aligned to coords now superpose. This is the
     closest substrate to an LLM residual stream.
     """
-    fm = build_feature_matrix(ens.trajectories, ens.shock_schedules)
+    fm = build_feature_matrix(
+        ens.trajectories, ens.shock_schedules,
+        base_rate=base_rate, monetary_step=monetary_step)
     rng = np.random.default_rng(seed)
     W = rng.standard_normal((DIM, embed_dim)).astype(np.float32)
     W /= np.linalg.norm(W, axis=0, keepdims=True) + 1e-9
@@ -87,7 +98,8 @@ def feed_embedded(ens: Ensemble, embed_dim: int = 12, seed: int = 0) -> Feed:
     )
 
 
-def feed_acts(ens: Ensemble, world_model, base_rate: float = 0.02) -> Feed:
+def feed_acts(ens: Ensemble, world_model, base_rate: float = 0.02,
+              monetary_step: float = 0.01) -> Feed:
     """World-model hidden activations as SAE substrate.
 
     Pushes every (traj, period, agent) input through the trained world
@@ -100,7 +112,9 @@ def feed_acts(ens: Ensemble, world_model, base_rate: float = 0.02) -> Feed:
     from econsae.sae.world_model import extract_h1_activations
     H1, idx = extract_h1_activations(world_model, ens.trajectories,
                                       ens.shock_schedules, base_rate=base_rate)
-    fm = build_feature_matrix(ens.trajectories, ens.shock_schedules)
+    fm = build_feature_matrix(
+        ens.trajectories, ens.shock_schedules,
+        base_rate=base_rate, monetary_step=monetary_step)
     # The indices should line up exactly with the GT matrix builder.
     assert idx == fm.sample_index, (
         "activation index does not match GT sample index -- ordering bug"

@@ -381,6 +381,30 @@ def test_morris_trajectory_properties():
         assert (moved_counts == 1).all()
 
 
+def test_feed_threshold_threading():
+    """feed_* thread base_rate/monetary_step into the phase:high_rate label."""
+    from econsae.sae.data import feed_raw
+    ens = generate_ensemble(n_trajectories=2, n_periods=12, seed=0)
+    j = feed_raw(ens).feature_vocab.index("phase:high_rate")
+    hot = feed_raw(ens, base_rate=0.0, monetary_step=0.0).Y[:, j]    # threshold 0 -> always
+    cold = feed_raw(ens, base_rate=10.0, monetary_step=0.0).Y[:, j]  # threshold 10 -> never
+    assert hot.sum() > 0
+    assert cold.sum() == 0
+
+
+def test_resolve_calibration_arm(tmp_path):
+    from scripts._calibration_arm import resolve_arm
+    from econsae.calibration import SimConfig
+    base = resolve_arm(None)
+    assert base.label == "baseline" and base.suffix == "" and base.sim_config is None
+    assert (base.base_rate, base.monetary_step) == (0.02, 0.01)
+    p = tmp_path / "c.json"
+    SimConfig.default().with_overrides(base_interest_rate=0.05, monetary_step=0.02).to_json(str(p))
+    cal = resolve_arm(str(p))
+    assert cal.label == "calibrated" and cal.suffix == "__calibrated"
+    assert abs(cal.base_rate - 0.05) < 1e-9 and abs(cal.monetary_step - 0.02) < 1e-9
+
+
 def test_morris_screening_structure():
     from econsae.calibration import morris_screening
     res = morris_screening(_TARGETS_PATH, r=2, p=4, n_traj=4, n_periods=30,
