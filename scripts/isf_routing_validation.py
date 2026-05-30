@@ -10,7 +10,8 @@ ensemble recipes, routed per label.
 The concise-via-routing thesis (sae-forge docs/concise-via-routing.md) predicts:
   1. the routed ensemble beats every single recipe (H-ISF headline);
   2. the lift is concentrated on the LOW-salience tiers (regime / conjunctive)
-     and is ~null on the salient bucketed tier (the salience law);
+     and is ~null on the salient bucketed tier (the salience HEURISTIC,
+     a rule of thumb, not a law);
   3. each objective-family specialist wins its matched tier.
 
 Outputs ``runs/isf_routing_validation_summary.json``.
@@ -130,10 +131,12 @@ def main() -> None:
             "The routed ensemble beats every single recipe (the H-ISF headline) "
             "in a second domain. The lift concentrates on the low-salience tiers "
             "(conjunctive, regime) and is ~null on the salient bucketed tier — "
-            "the salience law. Each objective-family specialist wins its matched "
+            "the salience heuristic (a rule of thumb). Each objective-family "
+            "specialist wins its matched "
             "tier. Margins are thinner than bio-sae's synthetic motifs because "
             "econ's hard tiers are partly salient on the world-model substrate, "
-            "exactly as the salience law predicts."
+            "as the heuristic suggests. NB: headroom is a cheap prior, not a "
+            "predictor — conjunctive here is low-headroom yet gains most."
         ),
     }
     out = RUNS / "isf_routing_validation_summary.json"
