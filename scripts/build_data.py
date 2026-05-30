@@ -44,14 +44,36 @@ DATA_DIR = os.path.join(REPO_ROOT, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
-def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
+def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0,
+         sim_config=None, out_name: str = "econ_ensemble.npz"):
+    """Build the ensemble bundle.
+
+    `sim_config` (Phase 10): an optional `SimConfig` of calibrated simulator
+    parameters. When provided it is forwarded to `generate_ensemble`, and its
+    calibrated policy-rate floor / monetary step are threaded into
+    `build_feature_matrix` so the `phase:high_rate` / `phase:contraction`
+    regime labels track the calibrated dynamics instead of the stale 0.02 /
+    0.01 defaults. `out_name` lets a calibrated build write to a separate
+    file without clobbering the canonical baseline bundle.
+    """
+    tag = "calibrated" if sim_config is not None else "Phase 0.5"
     print("=" * 78)
-    print(f"Phase 0.5 ensemble: n_traj={n_trajectories}, n_periods={n_periods}, seed={seed}")
+    print(f"{tag} ensemble: n_traj={n_trajectories}, n_periods={n_periods}, seed={seed}")
     print("=" * 78)
 
     ens = generate_ensemble(
         n_trajectories=n_trajectories, n_periods=n_periods, seed=seed,
+        sim_config=sim_config,
     )
+
+    # Regime-label thresholds: keep them in sync with the (possibly
+    # calibrated) shock schedule so the ground-truth labels are graded
+    # against the dynamics that actually produced them.
+    if sim_config is not None:
+        base_rate = sim_config.shock.base_interest_rate
+        monetary_step = sim_config.shock.monetary_step
+    else:
+        base_rate, monetary_step = 0.02, 0.01
     cons = ens.conservation_summary()
     print(f"  conservation (worst over ensemble): "
           f"max residual = {max(cons.values()):.2e}")
@@ -72,7 +94,10 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
     print(f"  macros: {len(macro_keys)} keys, shape per key {macros[macro_keys[0]].shape}")
 
     # Build SAE-ready (X, Y) feature matrix
-    fm = build_feature_matrix(ens.trajectories, ens.shock_schedules)
+    fm = build_feature_matrix(
+        ens.trajectories, ens.shock_schedules,
+        base_rate=base_rate, monetary_step=monetary_step,
+    )
     print(f"  feature matrix: X={fm.X.shape}, Y={fm.Y.shape}, "
           f"vocab={len(fm.feature_vocab)} GT features")
     prev = fm.Y.mean(axis=0)
@@ -86,7 +111,7 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
         for t, ks in enumerate(sched.kinds):
             shock_kinds_grid[ti, t] = "|".join(sorted(ks))
 
-    out_path = os.path.join(DATA_DIR, "econ_ensemble.npz")
+    out_path = os.path.join(DATA_DIR, out_name)
     np.savez_compressed(
         out_path,
         states=states,

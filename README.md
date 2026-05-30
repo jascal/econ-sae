@@ -21,12 +21,15 @@ the Standard Model of particle physics.
 
 ## Status
 
-Pre-alpha, **Phase 1**. The multi-good, multi-cohort, credit-enabled
-simulator runs cleanly; all 6 accounting identities hold to machine
-precision; the SAE training + AUC alignment pipeline trains 9 SAEs
-(3 variants × 3 feeds) and grades them on the 51-feature ground-truth
-vocabulary with a per-tier difficulty breakdown. The Polygram bridge
-remains a stub for the next iteration.
+Pre-alpha, **Phase 10** (see the Roadmap below for the full phase log).
+The multi-good, multi-cohort, credit-enabled simulator runs cleanly; all 6
+accounting identities hold to machine precision; the SAE training + AUC
+alignment pipeline trains SAEs across multiple feeds and grades them on the
+51-feature ground-truth vocabulary with a per-tier difficulty breakdown. All
+four feature tiers are now recovered at AUC ≥ 0.95 in single training runs;
+the Polygram SAE-forge pipeline runs end-to-end; and the simulator's free
+parameters can be calibrated to historical US macro moments
+(`scripts/calibrate.py`).
 
 ### Headline results (32 trajectories × 60 periods, default Phase 1 run)
 
@@ -1467,8 +1470,36 @@ the full alignment matrix and per-tier metrics are written to
   activations but not the next-state MSE -- a real finding, since
   saeforge's residual-stream architecture requires non-trivial
   scale_boost tuning to stay numerically stable.
-- **Phase 9.4+**: calibration to historical macro data;
-  LLM-augmented agents.
+- **Phase 10** (latest): calibration to historical macro data. New
+  `econsae/calibration/` package fits the simulator's free parameters
+  (shock volatilities, impulse probabilities, policy-rate level, AR
+  persistence) to a vendored snapshot of US macro moments
+  (`data/macro_targets_us.json`, derived from FRED GDPC1 / FEDFUNDS /
+  CPIAUCSL over 1990-2019; committed offline for reproducibility). The
+  moments are scale-invariant (growth rates, volatilities, autocorrelation,
+  recession frequency) since the simulator's GDP/money are in synthetic
+  units. A new `SimConfig` threads the previously-unreachable shock kwargs
+  through `generate_ensemble` (the default path stays byte-identical), a
+  `price_level` macro key is exported for the inflation series, and
+  derivative-free `differential_evolution` minimizes a weighted
+  moment-distance. The `fast` budget cut the objective 54.6 -> 30.9, pulling
+  `recession_freq` 0.29 -> 0.14, `fedfunds_mean` toward 0.035, and
+  growth/inflation volatility down (the synthetic economy's GDP growth stays
+  net-negative and over-volatile -- partly endogenous, only reachable so far
+  with the shock knobs; a `thorough` budget tightens the fit).
+  **Headline**: `scripts/phase10_calibrated_benchmark.py` re-runs the
+  dual-head regime pipeline under baseline vs calibrated dynamics with an
+  identical training config (64x100, 40 WM epochs, one JumpReLU w512 SAE,
+  `sentiment_strength=0.20` fixed). Calibration *substantially* shifts the
+  regime distribution -- `phase:monetary_active` 10.6% -> 40.0%,
+  `phase:high_rate` 25.6% -> 64.0%, mean policy rate 0.024 -> 0.092 -- yet
+  every tier's mean-best-AUC is **preserved or improved**: regime
+  0.883 -> 0.904 (+0.021), conjunctive 0.933 -> 0.938, categorical +0.034,
+  bucketed +0.010. The SAE-recovery findings are robust to grounding the
+  dynamics in real macro statistics. (Absolute mAUCs sit below the Phase
+  9.2.1 headline 0.959 because this is a reduced-budget controlled A/B --
+  the calibrated-vs-baseline *delta* is the result, not the absolute level.)
+- **Phase 10+**: LLM-augmented agents.
 
 ## Acknowledgements
 

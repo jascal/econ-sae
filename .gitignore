@@ -67,6 +67,15 @@ runs/forge/**/validation_report.json
 # the weights -- same treatment as the input sae.safetensors above.
 runs/forge/**/forged_synthetic/forged/model.safetensors
 
+# Phase 10 calibration: re-include the small summary reports (the headline
+# moment fit + the calibrated-vs-baseline benchmark deltas) for direct
+# readability on GitHub. The objective trace stays ignored as regeneratable
+# bulk; the fitted config itself lives under configs/ (not runs/) and is
+# tracked normally.
+!runs/calibration/
+runs/calibration/*
+!runs/calibration/*_summary.json
+
 # Generated data bundles -- checked in by default so the repo is usable
 # without running scripts/build_data.py first. Comment these in to track
 # only the build scripts:

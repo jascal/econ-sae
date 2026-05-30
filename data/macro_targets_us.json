@@ -1,0 +1,54 @@
+{
+  "provenance": {
+    "description": "US macroeconomic summary moments used as calibration targets for the econ-sae simulator (Phase 10). Values are committed offline (no live API) for full reproducibility; refresh by re-deriving from the cited FRED series.",
+    "fred_series": {
+      "GDPC1": "Real Gross Domestic Product, quarterly, seasonally-adjusted annual rate",
+      "FEDFUNDS": "Effective Federal Funds Rate, monthly, percent (aggregated to quarterly)",
+      "CPIAUCSL": "CPI for All Urban Consumers: All Items, monthly index (aggregated to quarterly)",
+      "GFDEBTN": "Federal Debt: Total Public Debt, level (reference only)",
+      "M2SL": "M2 Money Stock, level (reference only)"
+    },
+    "date_range": "1990-01-01 to 2019-12-31",
+    "frequency": "one simulator period is treated as one calendar quarter",
+    "vintage": "hand-entered 2026-05 from published FRED summary statistics over the window above",
+    "notes": [
+      "Targets are scale-invariant (growth rates, volatilities, autocorrelation, an event frequency, a ratio). The simulator's GDP/money/price are in arbitrary synthetic units, so levels are never targeted.",
+      "recession_freq is the prevalence of the simulator's `phase:contraction` rule (GDP < 0.90 x trailing-5-period mean), set near the US recession share so the contraction regime label stays learnable (neither degenerate nor saturated). It is NOT the NBER recession rule applied verbatim.",
+      "debt_to_money is reference-only (weight 0): the simulator's household+firm debt/money ratio (~0.15) lives on a different absolute scale than US federal-debt/M2 (~0.85), so matching it would distort behavioral params without improving realism. Reported for transparency, excluded from the objective.",
+      "Pre-COVID window (ends 2019) avoids the 2020 outlier quarter dominating the volatility moments."
+    ]
+  },
+  "moments": {
+    "gdp_growth_mean": 0.0065,
+    "gdp_growth_vol": 0.006,
+    "gdp_growth_ac1": 0.35,
+    "recession_freq": 0.10,
+    "fedfunds_mean": 0.035,
+    "fedfunds_vol": 0.025,
+    "inflation_mean": 0.006,
+    "inflation_vol": 0.004,
+    "debt_to_money": 0.85
+  },
+  "scales": {
+    "gdp_growth_mean": 0.004,
+    "gdp_growth_vol": 0.02,
+    "gdp_growth_ac1": 0.2,
+    "recession_freq": 0.05,
+    "fedfunds_mean": 0.015,
+    "fedfunds_vol": 0.015,
+    "inflation_mean": 0.005,
+    "inflation_vol": 0.01,
+    "debt_to_money": 1.0
+  },
+  "weights": {
+    "gdp_growth_mean": 1.0,
+    "gdp_growth_vol": 1.0,
+    "gdp_growth_ac1": 0.5,
+    "recession_freq": 1.0,
+    "fedfunds_mean": 1.0,
+    "fedfunds_vol": 0.75,
+    "inflation_mean": 0.75,
+    "inflation_vol": 0.5,
+    "debt_to_money": 0.0
+  }
+}

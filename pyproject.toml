@@ -35,6 +35,9 @@ polygram = [
 viz = [
   "matplotlib>=3.7",
 ]
+calibration = [
+  "scipy>=1.10",
+]
 dev = [
   "pytest>=7",
   "pytest-cov>=4",
@@ -49,12 +52,13 @@ econ-sae-build-data    = "scripts.build_data:main"
 econ-sae-train-all     = "scripts.train_all:main"
 econ-sae-evaluate      = "scripts.evaluate:main"
 econ-sae-polygram-demo = "scripts.polygram_demo:main"
+econ-sae-calibrate     = "scripts.calibrate:main"
 
 [project.urls]
 Homepage = "https://github.com/jascal/econ-sae"
 
 [tool.setuptools]
-packages = ["econsae", "econsae.simulator", "econsae.sae"]
+packages = ["econsae", "econsae.simulator", "econsae.sae", "econsae.calibration"]
 
 [tool.setuptools.package-data]
 econsae = ["py.typed"]
