@@ -15,6 +15,20 @@ This package adds:
                        of historical US macro moments (`data/macro_targets_us.json`).
 
 Nothing here imports torch; the calibration loop only runs the simulator.
+
+Extending
+---------
+  - **New moment**: add a key to `MOMENT_KEYS` + its computation in
+    `compute_moments` (keep it scale-invariant -- rates/ratios/frequencies,
+    never levels), then add `moments`/`scales`/`weights` entries in
+    `data/macro_targets_us.json`. `moment_distance` and the optimizer pick
+    it up automatically.
+  - **Custom targets**: point `calibrate(targets_path=...)` /
+    `scripts/calibrate.py --targets` at any JSON with the same
+    moments/scales/weights/provenance shape.
+  - **Different knobs**: edit `DEFAULT_PARAM_BOUNDS` in `optimize.py` (any
+    `ShockParams`/`BehavioralParams` field is addressable by name), or pass
+    `param_bounds=` to `calibrate`.
 """
 
 from econsae.calibration.config import (

@@ -93,6 +93,17 @@ class SimConfig:
         """All calibratable params as one flat name->value dict."""
         return {**self.shock_kwargs(), **self.behavioral_kwargs()}
 
+    def summary(self) -> str:
+        """Compact one-line view of params that differ from the default.
+
+        Handy for logging during optimization -- the full dataclass repr is
+        noisy when only a handful of knobs have moved.
+        """
+        base = SimConfig.default().flat()
+        diffs = [f"{k}={v:.4g}" for k, v in self.flat().items()
+                 if abs(v - base[k]) > 1e-9]
+        return "SimConfig(default)" if not diffs else f"SimConfig({', '.join(diffs)})"
+
     # --- serialization -----------------------------------------------------
     def to_dict(self) -> dict:
         return {"shock": asdict(self.shock), "behavioral": asdict(self.behavioral)}

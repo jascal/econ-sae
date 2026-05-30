@@ -205,25 +205,34 @@ def main():
 
     # ---- comparison ----
     base_r, calib_r = results
+    def _recovered(arm, tier):
+        pt = arm["per_tier"][tier]
+        return int(round(pt["coverage_0.95"] * pt["n_features"])), pt["n_features"]
+
     tier_delta = {
         tier: {
+            "n_features": base_r["per_tier"][tier]["n_features"],
             "baseline_mAUC": base_r["per_tier"][tier]["mean_best_auc"],
             "calibrated_mAUC": calib_r["per_tier"][tier]["mean_best_auc"],
             "delta": calib_r["per_tier"][tier]["mean_best_auc"]
                      - base_r["per_tier"][tier]["mean_best_auc"],
+            # features recovered at AUC >= 0.95 (count, not just the mean)
+            "baseline_recovered_at_0.95": _recovered(base_r, tier)[0],
+            "calibrated_recovered_at_0.95": _recovered(calib_r, tier)[0],
         }
         for tier in TIERS
     }
 
     print("\n" + "=" * 78)
-    print("PHASE 10 COMPARISON  (tier mean-best-AUC: baseline -> calibrated)")
+    print("PHASE 10 COMPARISON  (tier mean-best-AUC + #recovered@0.95: baseline -> calibrated)")
     print("=" * 78)
-    print(f"{'tier':<12s} {'baseline':>9s} {'calibrated':>11s} {'delta':>8s}")
-    print("-" * 44)
+    print(f"{'tier':<12s} {'baseline':>9s} {'calibrated':>11s} {'delta':>8s}   {'rec@.95':>10s}")
+    print("-" * 58)
     for tier in TIERS:
         d = tier_delta[tier]
+        rec = f"{d['baseline_recovered_at_0.95']}->{d['calibrated_recovered_at_0.95']}/{d['n_features']}"
         print(f"{tier:<12s} {d['baseline_mAUC']:>9.3f} {d['calibrated_mAUC']:>11.3f} "
-              f"{d['delta']:>+8.3f}")
+              f"{d['delta']:>+8.3f}   {rec:>10s}")
 
     summary = {
         "budget": budget,

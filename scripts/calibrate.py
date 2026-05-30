@@ -49,16 +49,18 @@ def main():
                     choices=["differential_evolution", "nelder-mead", "random"])
     ap.add_argument("--targets", default=os.path.join("data", "macro_targets_us.json"))
     ap.add_argument("--out", default=os.path.join("configs", "calibrated_macro.json"))
+    ap.add_argument("--seed", type=int, default=0,
+                    help="optimizer RNG seed (DE population / random search)")
     args = ap.parse_args()
 
     budget = BUDGETS[args.budget]
     print("=" * 78)
-    print(f"Phase 10 calibration | budget={args.budget} method={args.method}")
+    print(f"Phase 10 calibration | budget={args.budget} method={args.method} seed={args.seed}")
     print(f"  ensemble per eval: {budget['n_traj']} traj x {budget['n_periods']} periods "
           f"x {len(budget['seeds'])} seeds | DE maxiter={budget['maxiter']} popsize={budget['popsize']}")
     print("=" * 78)
 
-    result = calibrate(args.targets, method=args.method, **budget)
+    result = calibrate(args.targets, method=args.method, de_seed=args.seed, **budget)
 
     os.makedirs(CONFIG_DIR, exist_ok=True)
     os.makedirs(REPORT_DIR, exist_ok=True)
