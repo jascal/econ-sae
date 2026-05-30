@@ -1,0 +1,39 @@
+{
+  "fixture": "econ-sae router geometry audit",
+  "tools": "saeforge.isf (router) + polygram.cluster_experts (geometry)",
+  "n_concepts": 44,
+  "n_recipes": 4,
+  "within_recipe_abs_cos": 0.29760462684087163,
+  "cross_recipe_abs_cos": 0.2147892736948203,
+  "cross_over_within": 0.7217269300375075,
+  "polygram_threshold_sweep": [
+    {
+      "threshold": 0.3,
+      "n_blocks": 1,
+      "purity": 0.4090909090909091
+    },
+    {
+      "threshold": 0.5,
+      "n_blocks": 10,
+      "purity": 0.8019047619047619
+    },
+    {
+      "threshold": 0.7,
+      "n_blocks": 25,
+      "purity": 0.9685714285714286
+    },
+    {
+      "threshold": 0.9,
+      "n_blocks": 36,
+      "purity": 1.0
+    }
+  ],
+  "one_block_chance_purity": 0.4090909090909091,
+  "router_composition": {
+    "baseline_host": 18,
+    "attn_f1": 10,
+    "regime_supervised_g": 7,
+    "conjunctive": 9
+  },
+  "reading": "Concepts routed to the SAME recipe are more cosine-similar to each other (within-recipe |cos|=0.298) than to concepts in other recipes (cross-recipe |cos|=0.215, ratio 0.72): the objective-family specialists own PARTIALLY orthogonal concept subspaces \u2014 non-redundant (ratio < 1) but not strongly disjoint (ratio not << 1), as expected when all recipes read the same economy. polygram's independent cosine clustering (threshold sweep) resolves the structure as the threshold tightens; purity above the one-big-block chance baseline (0.409) means the geometric blocks track the router partition. Closes the n-orca -> sae-forge -> polygram loop on a real fixture; honest read: modest, not dramatic, orthogonality."
+}
