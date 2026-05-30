@@ -1,0 +1,218 @@
+{
+  "method": "morris_elementary_effects",
+  "r_trajectories": 12,
+  "p_levels": 4,
+  "delta": 0.6666666666666666,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "n_traj": 8,
+  "n_periods": 60,
+  "n_evals": 108,
+  "param_names": [
+    "tfp_ar",
+    "tfp_factor_vol",
+    "tfp_idio_vol",
+    "sentiment_factor_vol",
+    "monetary_prob",
+    "monetary_step",
+    "base_interest_rate",
+    "fiscal_prob"
+  ],
+  "bounds": {
+    "tfp_ar": [
+      0.0,
+      0.95
+    ],
+    "tfp_factor_vol": [
+      0.005,
+      0.15
+    ],
+    "tfp_idio_vol": [
+      0.002,
+      0.08
+    ],
+    "sentiment_factor_vol": [
+      0.005,
+      0.12
+    ],
+    "monetary_prob": [
+      0.02,
+      0.4
+    ],
+    "monetary_step": [
+      0.002,
+      0.03
+    ],
+    "base_interest_rate": [
+      0.005,
+      0.08
+    ],
+    "fiscal_prob": [
+      0.02,
+      0.3
+    ]
+  },
+  "ranking": [
+    {
+      "param": "tfp_ar",
+      "mu": 169.03976361517107,
+      "mu_star": 169.29459582721805,
+      "sigma": 291.6859395488709,
+      "rank": 1
+    },
+    {
+      "param": "tfp_factor_vol",
+      "mu": 80.86444915539646,
+      "mu_star": 80.86444915539646,
+      "sigma": 132.22242701434416,
+      "rank": 2
+    },
+    {
+      "param": "sentiment_factor_vol",
+      "mu": 34.09860528878539,
+      "mu_star": 42.282168254782526,
+      "sigma": 32.13948714804118,
+      "rank": 3
+    },
+    {
+      "param": "base_interest_rate",
+      "mu": 14.766853616212174,
+      "mu_star": 26.50626630281108,
+      "sigma": 40.63902333180706,
+      "rank": 4
+    },
+    {
+      "param": "monetary_step",
+      "mu": 9.163801367365501,
+      "mu_star": 12.241229872097323,
+      "sigma": 20.417363159585364,
+      "rank": 5
+    },
+    {
+      "param": "monetary_prob",
+      "mu": 5.6552987374001304,
+      "mu_star": 9.549601190464001,
+      "sigma": 12.901549522591553,
+      "rank": 6
+    },
+    {
+      "param": "fiscal_prob",
+      "mu": 7.800322420798846,
+      "mu_star": 7.800322420798846,
+      "sigma": 3.3196104915421887,
+      "rank": 7
+    },
+    {
+      "param": "tfp_idio_vol",
+      "mu": 7.091091302525004,
+      "mu_star": 7.091091302525004,
+      "sigma": 6.493713682173268,
+      "rank": 8
+    }
+  ],
+  "mu_star_by_moment": {
+    "tfp_ar": {
+      "gdp_growth_mean": 0.007303831287269632,
+      "gdp_growth_vol": 0.002678094236912218,
+      "gdp_growth_ac1": 0.09761269615389467,
+      "recession_freq": 0.035840395480226016,
+      "fedfunds_mean": 0.0,
+      "fedfunds_vol": 0.0,
+      "inflation_mean": 0.01687794243084392,
+      "inflation_vol": 0.08380718147092897,
+      "debt_to_money": 0.03480519646510074
+    },
+    "tfp_factor_vol": {
+      "gdp_growth_mean": 0.004792962478657345,
+      "gdp_growth_vol": 0.013194118552530961,
+      "gdp_growth_ac1": 0.17681798327673837,
+      "recession_freq": 0.06814971751412428,
+      "fedfunds_mean": 0.0,
+      "fedfunds_vol": 0.0,
+      "inflation_mean": 0.006879819113249847,
+      "inflation_vol": 0.07891493583184049,
+      "debt_to_money": 0.022418280461373202
+    },
+    "tfp_idio_vol": {
+      "gdp_growth_mean": 0.0006291076369444892,
+      "gdp_growth_vol": 0.004342605311207744,
+      "gdp_growth_ac1": 0.01707369426953321,
+      "recession_freq": 0.011211158192090396,
+      "fedfunds_mean": 0.0,
+      "fedfunds_vol": 0.0,
+      "inflation_mean": 0.0014563475474214107,
+      "inflation_vol": 0.00625933698626125,
+      "debt_to_money": 0.013525396200438258
+    },
+    "sentiment_factor_vol": {
+      "gdp_growth_mean": 0.0032410649857790258,
+      "gdp_growth_vol": 0.07129848727015135,
+      "gdp_growth_ac1": 0.2948850817975606,
+      "recession_freq": 0.0873940677966102,
+      "fedfunds_mean": 0.0,
+      "fedfunds_vol": 0.0,
+      "inflation_mean": 0.0,
+      "inflation_vol": 0.0,
+      "debt_to_money": 0.01221066389291072
+    },
+    "monetary_prob": {
+      "gdp_growth_mean": 0.0017750347867839429,
+      "gdp_growth_vol": 0.0027052859698511148,
+      "gdp_growth_ac1": 0.032228182667502416,
+      "recession_freq": 0.01730225988700564,
+      "fedfunds_mean": 0.012563107638888899,
+      "fedfunds_vol": 0.02751276713638731,
+      "inflation_mean": 0.0,
+      "inflation_vol": 0.0,
+      "debt_to_money": 0.003037695052314854
+    },
+    "monetary_step": {
+      "gdp_growth_mean": 0.0018643892776142033,
+      "gdp_growth_vol": 0.0035974620238755643,
+      "gdp_growth_ac1": 0.010752637882162864,
+      "recession_freq": 0.0146539548022599,
+      "fedfunds_mean": 0.01014262152777778,
+      "fedfunds_vol": 0.038820579721131336,
+      "inflation_mean": 0.0,
+      "inflation_vol": 0.0,
+      "debt_to_money": 0.003390092334986012
+    },
+    "base_interest_rate": {
+      "gdp_growth_mean": 0.00622917713184263,
+      "gdp_growth_vol": 0.006079787978777664,
+      "gdp_growth_ac1": 0.0939127173123196,
+      "recession_freq": 0.025423728813559306,
+      "fedfunds_mean": 0.06396140046296293,
+      "fedfunds_vol": 0.007039176487110662,
+      "inflation_mean": 0.0,
+      "inflation_vol": 0.0,
+      "debt_to_money": 0.022161530081948624
+    },
+    "fiscal_prob": {
+      "gdp_growth_mean": 0.0008427047301498768,
+      "gdp_growth_vol": 0.008906424286593113,
+      "gdp_growth_ac1": 0.028088595696345378,
+      "recession_freq": 0.011652542372881353,
+      "fedfunds_mean": 0.0,
+      "fedfunds_vol": 0.0,
+      "inflation_mean": 0.0,
+      "inflation_vol": 0.0,
+      "debt_to_money": 0.005432301377715756
+    }
+  },
+  "top_driver_per_moment": {
+    "gdp_growth_mean": "tfp_ar",
+    "gdp_growth_vol": "sentiment_factor_vol",
+    "gdp_growth_ac1": "sentiment_factor_vol",
+    "recession_freq": "sentiment_factor_vol",
+    "fedfunds_mean": "base_interest_rate",
+    "fedfunds_vol": "monetary_step",
+    "inflation_mean": "tfp_ar",
+    "inflation_vol": "tfp_ar",
+    "debt_to_money": "tfp_ar"
+  },
+  "notes": "mu_star ranks objective influence; low mu_star => the moments barely respond => the knob is unidentifiable. sigma high => nonlinear/interacting. mu_star_by_moment shows which knob drives which moment (pick an identifying moment for a loose knob from its column)."
+}

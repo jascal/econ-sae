@@ -1511,6 +1511,21 @@ the full alignment matrix and per-tier metrics are written to
   expected underdetermination of a more-params-than-moments fit. (The
   correlation matrix is the right tool to inspect *which* knobs trade off;
   at a small start count those off-diagonals are themselves noisy.)
+- **Phase 10.2** (latest): Morris elementary-effects sensitivity screening
+  ([`scripts/calibration_sensitivity.py`](scripts/calibration_sensitivity.py),
+  `econsae/calibration/sensitivity.py`). Where identifiability asks "where do
+  fits land?", Morris asks "how much does each knob move the moments?" -- so
+  it *explains* the identifiability result. The mu* ranking (108 evals)
+  confirms the volatility knobs are the most influential and the **monetary
+  knobs are among the least** (`monetary_step`/`monetary_prob` rank 5-6 of
+  8) -- which is exactly why they are loosely identified: the moments barely
+  respond to them. `tfp_ar` is the most influential but with the largest
+  sigma (strongly nonlinear/interacting), explaining why it is influential
+  yet only moderately pinned. The per-(param, moment) mu* matrix shows which
+  knob drives which moment (`fedfunds_vol` <- `monetary_step`,
+  `gdp_growth_vol` <- `sentiment_factor_vol`, ...); notably `monetary_prob`
+  is the top driver of *no* moment, so an identifying moment for it (e.g.
+  rate-change frequency) would have to be added rather than reweighted.
 - **Phase 10+**: LLM-augmented agents.
 
 ## Acknowledgements

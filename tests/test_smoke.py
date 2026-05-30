@@ -358,3 +358,41 @@ def test_refresh_macro_targets_parsing(tmp_path):
     p2 = tmp_path / "empty.csv"
     p2.write_text("observation_date,X\n1990-01-01,.\n1990-02-01,NaN\n")
     assert _read_fred_csv(str(p2)) == {}
+
+
+def test_morris_trajectory_properties():
+    """Each Morris trajectory: consecutive rows differ in exactly one coord
+    by +/- delta, and all coordinates stay in [0, 1]."""
+    from econsae.calibration.sensitivity import _morris_trajectory
+    k, p = 6, 4
+    delta = p / (2.0 * (p - 1))
+    rng = np.random.default_rng(0)
+    for _ in range(20):
+        B = _morris_trajectory(k, p, delta, rng)
+        assert B.shape == (k + 1, k)
+        assert B.min() >= -1e-9 and B.max() <= 1 + 1e-9
+        for j in range(k):
+            d = np.abs(B[j + 1] - B[j])
+            moved = d > 1e-9
+            assert moved.sum() == 1                       # exactly one coord moves
+            assert abs(d[moved][0] - delta) < 1e-9        # by exactly delta
+        # every coordinate is perturbed exactly once across the trajectory
+        moved_counts = (np.abs(np.diff(B, axis=0)) > 1e-9).sum(axis=0)
+        assert (moved_counts == 1).all()
+
+
+def test_morris_screening_structure():
+    from econsae.calibration import morris_screening
+    res = morris_screening(_TARGETS_PATH, r=2, p=4, n_traj=4, n_periods=30,
+                           seeds=(0, 1), seed=0)
+    k = len(res.param_names)
+    assert res.n_evals == 2 * (k + 1)                     # r * (k+1)
+    table = res.ranking_table()
+    assert {r["param"] for r in table} == set(res.param_names)
+    assert [r["rank"] for r in table] == list(range(1, k + 1))
+    assert all(r["mu_star"] >= 0.0 for r in table)
+    # per-moment mu* matrix is complete
+    for n in res.param_names:
+        assert set(res.mu_star_by_moment[n]) == set(res.moment_keys)
+    assert set(res.top_driver_per_moment()) == set(res.moment_keys)
+    assert "ranking" in res.to_report()
