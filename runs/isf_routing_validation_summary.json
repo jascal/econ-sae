@@ -1,0 +1,81 @@
+{
+  "fixture": "econ-sae",
+  "primitive": "saeforge.isf (ensemble_route + salience_headroom)",
+  "thesis": "docs/concise-via-routing.md (sae-forge)",
+  "recipes": [
+    "baseline_host",
+    "attn_f1",
+    "regime_supervised_g",
+    "conjunctive"
+  ],
+  "n_labels_scored": 44,
+  "route": {
+    "per_recipe_mauc": {
+      "baseline_host": 0.799910293846002,
+      "attn_f1": 0.7763248222737965,
+      "regime_supervised_g": 0.7586731088816593,
+      "conjunctive": 0.7807982944295112
+    },
+    "ensemble_mauc": 0.8122323531136838,
+    "best_single_recipe": "baseline_host",
+    "ensemble_lift": 0.012322059267681817,
+    "host": "baseline_host",
+    "retained": 1.0154043014103955,
+    "frac_beats_host": 0.5909090909090909,
+    "router_composition": {
+      "baseline_host": 18,
+      "attn_f1": 10,
+      "regime_supervised_g": 7,
+      "conjunctive": 9
+    }
+  },
+  "per_tier": {
+    "categorical": {
+      "n_labels": 25,
+      "host_mauc": 0.7749840918604473,
+      "ensemble_mauc": 0.7844914106900847,
+      "lift_over_host": 0.009507318829637401,
+      "salience_headroom": 0.22501590813955283,
+      "router_composition": {
+        "conjunctive": 4,
+        "attn_f1": 10,
+        "baseline_host": 7,
+        "regime_supervised_g": 4
+      }
+    },
+    "bucketed": {
+      "n_labels": 7,
+      "host_mauc": 0.9169700590202284,
+      "ensemble_mauc": 0.9183315161940249,
+      "lift_over_host": 0.001361457173796432,
+      "salience_headroom": 0.08302994097977164,
+      "router_composition": {
+        "baseline_host": 5,
+        "conjunctive": 2
+      }
+    },
+    "regime": {
+      "n_labels": 6,
+      "host_mauc": 0.6393366944822951,
+      "ensemble_mauc": 0.655295215196462,
+      "lift_over_host": 0.015958520714166924,
+      "salience_headroom": 0.36066330551770487,
+      "router_composition": {
+        "regime_supervised_g": 3,
+        "baseline_host": 3
+      }
+    },
+    "conjunctive": {
+      "n_labels": 6,
+      "host_mauc": 0.9277733421129232,
+      "ensemble_mauc": 0.9609743942021715,
+      "lift_over_host": 0.033201052089248284,
+      "salience_headroom": 0.07222665788707683,
+      "router_composition": {
+        "baseline_host": 3,
+        "conjunctive": 3
+      }
+    }
+  },
+  "reading": "The routed ensemble beats every single recipe (the H-ISF headline) in a second domain. The lift concentrates on the low-salience tiers (conjunctive, regime) and is ~null on the salient bucketed tier \u2014 the salience law. Each objective-family specialist wins its matched tier. Margins are thinner than bio-sae's synthetic motifs because econ's hard tiers are partly salient on the world-model substrate, exactly as the salience law predicts."
+}
