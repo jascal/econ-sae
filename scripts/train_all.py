@@ -69,10 +69,15 @@ def load_world_model() -> WorldModel:
     return model
 
 
-def build_feed(name: str, ens):
-    if name == "raw":      return feed_raw(ens)
-    if name == "embedded": return feed_embedded(ens, embed_dim=12, seed=0)
-    if name == "acts":     return feed_acts(ens, load_world_model())
+def build_feed(name: str, ens, base_rate: float = 0.02, monetary_step: float = 0.01):
+    if name == "raw":
+        return feed_raw(ens, base_rate=base_rate, monetary_step=monetary_step)
+    if name == "embedded":
+        return feed_embedded(ens, embed_dim=12, seed=0,
+                             base_rate=base_rate, monetary_step=monetary_step)
+    if name == "acts":
+        return feed_acts(ens, load_world_model(),
+                         base_rate=base_rate, monetary_step=monetary_step)
     raise ValueError(name)
 
 
@@ -89,12 +94,23 @@ def build_sae(variant: str, input_dim: int, feed_name: str):
     raise ValueError(variant)
 
 
-def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
+def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0,
+         calibrated: str | None = None, quick: bool = False):
+    from scripts._calibration_arm import resolve_arm
+    arm = resolve_arm(calibrated)
+    epoch_cap = 20 if quick else None
+
     print("=" * 78)
-    print(f"Generating ensemble (n_traj={n_trajectories}, n_periods={n_periods})")
+    print(f"[{arm.label}] ensemble (n_traj={n_trajectories}, n_periods={n_periods})"
+          + (f"  config={calibrated}" if calibrated else ""))
+    if arm.sim_config is not None:
+        print("  note: the 'acts' feed runs the baseline world_model.pt on "
+              "calibrated\n        data (encoder transfer). For a matched-encoder "
+              "A/B use\n        scripts/phase10_calibrated_benchmark.py.")
     print("=" * 78)
     torch.manual_seed(seed)
-    ens = generate_ensemble(n_trajectories=n_trajectories, n_periods=n_periods, seed=seed)
+    ens = generate_ensemble(n_trajectories=n_trajectories, n_periods=n_periods,
+                            seed=seed, sim_config=arm.sim_config)
 
     rows: list[dict] = []
     summary: dict = {}
@@ -103,7 +119,8 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
         print("\n" + "=" * 78)
         print(f"FEED: {feed_name}")
         print("=" * 78)
-        feed = build_feed(feed_name, ens)
+        feed = build_feed(feed_name, ens, base_rate=arm.base_rate,
+                          monetary_step=arm.monetary_step)
         print(f"  X: {tuple(feed.X.shape)}  Y: {feed.Y.shape}  "
               f"vocab: {len(feed.feature_vocab)} GT features")
         print(f"  notes: {feed.notes}")
@@ -113,11 +130,12 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
             print(f"\n--- {variant} on {feed_name} ---")
             torch.manual_seed(seed)
             sae = build_sae(variant, feed.D, feed_name)
+            epochs = min(fcfg["epochs"], epoch_cap) if epoch_cap else fcfg["epochs"]
             tcfg = TrainConfig(
-                epochs=fcfg["epochs"], batch_size=fcfg["batch_size"],
+                epochs=epochs, batch_size=fcfg["batch_size"],
                 lr=1e-3, warmup_steps=50,
-                resample_every=max(100, fcfg["epochs"] // 5),
-                log_every=max(50, fcfg["epochs"] // 4),
+                resample_every=max(100, epochs // 5),
+                log_every=max(50, epochs // 4),
             )
             t0 = time.time()
             hist = train(sae, feed.X, tcfg, verbose=False)
@@ -133,7 +151,7 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
                 ve = 1.0 - var_resid / max(var_total, 1e-12)
 
             run_id = f"{feed_name}__{variant}"
-            ckpt_path = os.path.join(RUNS_DIR, f"{run_id}.pt")
+            ckpt_path = os.path.join(RUNS_DIR, f"{run_id}{arm.suffix}.pt")
             torch.save({
                 "state_dict": sae.state_dict(),
                 "kind": variant, "feed_name": feed_name,
@@ -167,10 +185,22 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0):
               f"{r['l0']:>6.2f} {r['dead_fraction']:>6.1%} {r['var_explained']:>8.4f} "
               f"{r['wall_time_s']:>6.1f}s")
 
-    with open(os.path.join(RUNS_DIR, "summary.json"), "w") as f:
+    summary_name = "summary_calibrated.json" if arm.suffix else "summary.json"
+    with open(os.path.join(RUNS_DIR, summary_name), "w") as f:
         json.dump(summary, f, indent=2)
-    print(f"\nWrote runs/summary.json")
+    print(f"\nWrote runs/{summary_name}")
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser(description="Phase 1 SAE runner (3 feeds x 3 variants).")
+    ap.add_argument("--calibrated", metavar="CONFIG.json", default=None,
+                    help="run the calibrated arm from a fitted SimConfig "
+                         "(writes __calibrated-suffixed artifacts)")
+    ap.add_argument("--quick", action="store_true", help="cap epochs at 20 for a fast run")
+    ap.add_argument("--n-traj", type=int, default=32)
+    ap.add_argument("--n-periods", type=int, default=60)
+    ap.add_argument("--seed", type=int, default=0)
+    args = ap.parse_args()
+    main(n_trajectories=args.n_traj, n_periods=args.n_periods, seed=args.seed,
+         calibrated=args.calibrated, quick=args.quick)
