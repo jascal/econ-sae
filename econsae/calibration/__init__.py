@@ -41,7 +41,12 @@ from econsae.calibration.moments import (
     compute_moments,
     moment_distance,
 )
-from econsae.calibration.optimize import CalibrationResult, calibrate
+from econsae.calibration.optimize import (
+    CalibrationResult,
+    MultiStartResult,
+    calibrate,
+    multistart_calibrate,
+)
 
 __all__ = [
     "BehavioralParams",
@@ -51,5 +56,7 @@ __all__ = [
     "compute_moments",
     "moment_distance",
     "CalibrationResult",
+    "MultiStartResult",
     "calibrate",
+    "multistart_calibrate",
 ]

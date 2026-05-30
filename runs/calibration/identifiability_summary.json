@@ -1,0 +1,338 @@
+{
+  "n_starts": 6,
+  "objective": {
+    "min": 42.70946004787266,
+    "max": 48.57799221286432,
+    "mean": 45.56528015505276,
+    "std": 2.0104071181083603
+  },
+  "best_start": {
+    "de_seed": 0,
+    "objective": 42.70946004787266,
+    "params": {
+      "tfp_ar": 0.007754629074278818,
+      "tfp_factor_vol": 0.010342774027297247,
+      "tfp_idio_vol": 0.03326566061362354,
+      "sentiment_factor_vol": 0.006067711808181615,
+      "monetary_prob": 0.34170049556848403,
+      "monetary_step": 0.02935474806780839,
+      "base_interest_rate": 0.035957168812716454,
+      "fiscal_prob": 0.14947484619231954
+    }
+  },
+  "thresholds": {
+    "well_below": 0.1,
+    "weak_above": 0.25,
+    "metric": "std of fitted value as a fraction of the bound range"
+  },
+  "param_names": [
+    "tfp_ar",
+    "tfp_factor_vol",
+    "tfp_idio_vol",
+    "sentiment_factor_vol",
+    "monetary_prob",
+    "monetary_step",
+    "base_interest_rate",
+    "fiscal_prob"
+  ],
+  "bounds": {
+    "tfp_ar": [
+      0.0,
+      0.95
+    ],
+    "tfp_factor_vol": [
+      0.005,
+      0.15
+    ],
+    "tfp_idio_vol": [
+      0.002,
+      0.08
+    ],
+    "sentiment_factor_vol": [
+      0.005,
+      0.12
+    ],
+    "monetary_prob": [
+      0.02,
+      0.4
+    ],
+    "monetary_step": [
+      0.002,
+      0.03
+    ],
+    "base_interest_rate": [
+      0.005,
+      0.08
+    ],
+    "fiscal_prob": [
+      0.02,
+      0.3
+    ]
+  },
+  "identifiability": [
+    {
+      "param": "tfp_ar",
+      "default": 0.7,
+      "mean": 0.2935407069819103,
+      "std": 0.2271716111791581,
+      "min": 0.007754629074278818,
+      "max": 0.6729928515243914,
+      "bound_lo": 0.0,
+      "bound_hi": 0.95,
+      "spread_frac": 0.23912801176753484,
+      "identifiability": "moderate"
+    },
+    {
+      "param": "tfp_factor_vol",
+      "default": 0.04,
+      "mean": 0.014227721496216162,
+      "std": 0.005026408640891803,
+      "min": 0.010105228516061812,
+      "max": 0.02482369135484113,
+      "bound_lo": 0.005,
+      "bound_hi": 0.15,
+      "spread_frac": 0.03466488717856416,
+      "identifiability": "well"
+    },
+    {
+      "param": "tfp_idio_vol",
+      "default": 0.02,
+      "mean": 0.021075667632161673,
+      "std": 0.015301054037262611,
+      "min": 0.005141952487881539,
+      "max": 0.04747599671918302,
+      "bound_lo": 0.002,
+      "bound_hi": 0.08,
+      "spread_frac": 0.19616735945208474,
+      "identifiability": "moderate"
+    },
+    {
+      "param": "sentiment_factor_vol",
+      "default": 0.03,
+      "mean": 0.007257690297811658,
+      "std": 0.00255656082541533,
+      "min": 0.005695554750596979,
+      "max": 0.012899427226398787,
+      "bound_lo": 0.005,
+      "bound_hi": 0.12,
+      "spread_frac": 0.02223096369926374,
+      "identifiability": "well"
+    },
+    {
+      "param": "monetary_prob",
+      "default": 0.1,
+      "mean": 0.18060144222555352,
+      "std": 0.10014710073139531,
+      "min": 0.07111005006121485,
+      "max": 0.34170049556848403,
+      "bound_lo": 0.02,
+      "bound_hi": 0.4,
+      "spread_frac": 0.26354500192472446,
+      "identifiability": "weak"
+    },
+    {
+      "param": "monetary_step",
+      "default": 0.01,
+      "mean": 0.020631231925536907,
+      "std": 0.009586370268517764,
+      "min": 0.007657222501962258,
+      "max": 0.02997706059606353,
+      "bound_lo": 0.002,
+      "bound_hi": 0.03,
+      "spread_frac": 0.3423703667327773,
+      "identifiability": "weak"
+    },
+    {
+      "param": "base_interest_rate",
+      "default": 0.02,
+      "mean": 0.035877763639641846,
+      "std": 0.007815461969038864,
+      "min": 0.027853465866725366,
+      "max": 0.05247463010290249,
+      "bound_lo": 0.005,
+      "bound_hi": 0.08,
+      "spread_frac": 0.10420615958718486,
+      "identifiability": "moderate"
+    },
+    {
+      "param": "fiscal_prob",
+      "default": 0.08,
+      "mean": 0.10492544099919798,
+      "std": 0.052874812769706424,
+      "min": 0.04355782288710651,
+      "max": 0.19339980847429306,
+      "bound_lo": 0.02,
+      "bound_hi": 0.3,
+      "spread_frac": 0.1888386170346658,
+      "identifiability": "moderate"
+    }
+  ],
+  "param_correlation": {
+    "tfp_ar": {
+      "tfp_ar": 1.0,
+      "tfp_factor_vol": -0.019905761710580318,
+      "tfp_idio_vol": -0.8519994740288535,
+      "sentiment_factor_vol": 0.8154124819070236,
+      "monetary_prob": -0.7267461930155882,
+      "monetary_step": -0.1351172729023336,
+      "base_interest_rate": -0.4175694444340469,
+      "fiscal_prob": -0.30893407109565885
+    },
+    "tfp_factor_vol": {
+      "tfp_ar": -0.019905761710580318,
+      "tfp_factor_vol": 1.0,
+      "tfp_idio_vol": -0.21815616375385963,
+      "sentiment_factor_vol": -0.25569421146737104,
+      "monetary_prob": 0.34511537102688805,
+      "monetary_step": -0.7111350829639035,
+      "base_interest_rate": 0.8951621725352032,
+      "fiscal_prob": -0.07126817807550567
+    },
+    "tfp_idio_vol": {
+      "tfp_ar": -0.8519994740288533,
+      "tfp_factor_vol": -0.21815616375385963,
+      "tfp_idio_vol": 1.0,
+      "sentiment_factor_vol": -0.5383162254813558,
+      "monetary_prob": 0.41866286045172674,
+      "monetary_step": 0.41002529928578546,
+      "base_interest_rate": 0.14317540016633212,
+      "fiscal_prob": -0.11059300506403538
+    },
+    "sentiment_factor_vol": {
+      "tfp_ar": 0.8154124819070236,
+      "tfp_factor_vol": -0.25569421146737104,
+      "tfp_idio_vol": -0.5383162254813558,
+      "sentiment_factor_vol": 1.0,
+      "monetary_prob": -0.4708803011046385,
+      "monetary_step": 0.3744562580993603,
+      "base_interest_rate": -0.5251070495358333,
+      "fiscal_prob": -0.49028389303552705
+    },
+    "monetary_prob": {
+      "tfp_ar": -0.7267461930155882,
+      "tfp_factor_vol": 0.34511537102688805,
+      "tfp_idio_vol": 0.41866286045172674,
+      "sentiment_factor_vol": -0.47088030110463847,
+      "monetary_prob": 0.9999999999999999,
+      "monetary_step": 0.04223745868037493,
+      "base_interest_rate": 0.6493409992023964,
+      "fiscal_prob": 0.2944495006154431
+    },
+    "monetary_step": {
+      "tfp_ar": -0.1351172729023336,
+      "tfp_factor_vol": -0.7111350829639036,
+      "tfp_idio_vol": 0.4100252992857855,
+      "sentiment_factor_vol": 0.37445625809936034,
+      "monetary_prob": 0.04223745868037493,
+      "monetary_step": 1.0,
+      "base_interest_rate": -0.6104109965276097,
+      "fiscal_prob": -0.07501833130586255
+    },
+    "base_interest_rate": {
+      "tfp_ar": -0.41756944443404687,
+      "tfp_factor_vol": 0.8951621725352031,
+      "tfp_idio_vol": 0.1431754001663321,
+      "sentiment_factor_vol": -0.5251070495358333,
+      "monetary_prob": 0.6493409992023964,
+      "monetary_step": -0.6104109965276098,
+      "base_interest_rate": 0.9999999999999998,
+      "fiscal_prob": -0.019583137849070998
+    },
+    "fiscal_prob": {
+      "tfp_ar": -0.30893407109565885,
+      "tfp_factor_vol": -0.07126817807550567,
+      "tfp_idio_vol": -0.11059300506403537,
+      "sentiment_factor_vol": -0.49028389303552705,
+      "monetary_prob": 0.2944495006154431,
+      "monetary_step": -0.07501833130586255,
+      "base_interest_rate": -0.019583137849070995,
+      "fiscal_prob": 1.0
+    }
+  },
+  "starts": [
+    {
+      "de_seed": 0,
+      "objective": 42.70946004787266,
+      "params": {
+        "tfp_ar": 0.007754629074278818,
+        "tfp_factor_vol": 0.010342774027297247,
+        "tfp_idio_vol": 0.03326566061362354,
+        "sentiment_factor_vol": 0.006067711808181615,
+        "monetary_prob": 0.34170049556848403,
+        "monetary_step": 0.02935474806780839,
+        "base_interest_rate": 0.035957168812716454,
+        "fiscal_prob": 0.14947484619231954
+      }
+    },
+    {
+      "de_seed": 1,
+      "objective": 48.57799221286432,
+      "params": {
+        "tfp_ar": 0.6729928515243914,
+        "tfp_factor_vol": 0.011972763325952707,
+        "tfp_idio_vol": 0.005459286628858029,
+        "sentiment_factor_vol": 0.012899427226398787,
+        "monetary_prob": 0.09376308387750071,
+        "monetary_step": 0.02997706059606353,
+        "base_interest_rate": 0.027853465866725366,
+        "fiscal_prob": 0.04355782288710651
+      }
+    },
+    {
+      "de_seed": 2,
+      "objective": 47.428681024664066,
+      "params": {
+        "tfp_ar": 0.20093643748170859,
+        "tfp_factor_vol": 0.02482369135484113,
+        "tfp_idio_vol": 0.021834760127647117,
+        "sentiment_factor_vol": 0.005695554750596979,
+        "monetary_prob": 0.28757732997611557,
+        "monetary_step": 0.007954438544689399,
+        "base_interest_rate": 0.05247463010290249,
+        "fiscal_prob": 0.07306736680756769
+      }
+    },
+    {
+      "de_seed": 3,
+      "objective": 45.74373828764761,
+      "params": {
+        "tfp_ar": 0.4845943773377096,
+        "tfp_factor_vol": 0.013039689269884303,
+        "tfp_idio_vol": 0.005141952487881539,
+        "sentiment_factor_vol": 0.006996060570905252,
+        "monetary_prob": 0.07111005006121485,
+        "monetary_step": 0.007657222501962258,
+        "base_interest_rate": 0.03288415311422461,
+        "fiscal_prob": 0.11138210897580726
+      }
+    },
+    {
+      "de_seed": 4,
+      "objective": 45.20648393608305,
+      "params": {
+        "tfp_ar": 0.2986086404039985,
+        "tfp_factor_vol": 0.015082182483259765,
+        "tfp_idio_vol": 0.013276349215776792,
+        "sentiment_factor_vol": 0.0060103402758403535,
+        "monetary_prob": 0.16312658507026204,
+        "monetary_step": 0.020537282135121147,
+        "base_interest_rate": 0.0339614884821194,
+        "fiscal_prob": 0.19339980847429306
+      }
+    },
+    {
+      "de_seed": 5,
+      "objective": 43.725325421184856,
+      "params": {
+        "tfp_ar": 0.09635730606937482,
+        "tfp_factor_vol": 0.010105228516061812,
+        "tfp_idio_vol": 0.04747599671918302,
+        "sentiment_factor_vol": 0.005877047154946961,
+        "monetary_prob": 0.12633110879974405,
+        "monetary_step": 0.028306639707576714,
+        "base_interest_rate": 0.032135675459162794,
+        "fiscal_prob": 0.05867069265809381
+      }
+    }
+  ]
+}
