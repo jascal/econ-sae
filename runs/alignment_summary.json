@@ -5,36 +5,36 @@
     "variant": "topk",
     "n_sae_features": 128,
     "n_active": 128,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.17647058823529413,
-    "coverage_0.90": 0.2549019607843137,
-    "mean_best_auc": 0.7065231204032898,
-    "monosemanticity": 0.2578125,
-    "n_top_matches": 9,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.15384615384615385,
+    "coverage_0.90": 0.25,
+    "mean_best_auc": 0.7039473056793213,
+    "monosemanticity": 0.2421875,
+    "n_top_matches": 8,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.2,
-        "coverage_0.90": 0.23333333333333334,
-        "mean_best_auc": 0.6819377541542053
+        "n_features": 31,
+        "coverage_0.95": 0.16129032258064516,
+        "coverage_0.90": 0.22580645161290322,
+        "mean_best_auc": 0.6701579093933105
       },
       "bucketed": {
         "n_features": 7,
-        "coverage_0.95": 0.14285714285714285,
-        "coverage_0.90": 0.2857142857142857,
-        "mean_best_auc": 0.8159704208374023
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.14285714285714285,
+        "mean_best_auc": 0.7567383646965027
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
-        "coverage_0.90": 0.5,
-        "mean_best_auc": 0.8146730661392212
+        "coverage_0.95": 0.375,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.8948865532875061
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.5575622320175171
+        "mean_best_auc": 0.5623515248298645
       }
     }
   },
@@ -44,36 +44,36 @@
     "variant": "l1",
     "n_sae_features": 128,
     "n_active": 128,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.19607843137254902,
-    "coverage_0.90": 0.2549019607843137,
-    "mean_best_auc": 0.7168522477149963,
-    "monosemanticity": 0.2890625,
-    "n_top_matches": 10,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.21153846153846154,
+    "coverage_0.90": 0.23076923076923078,
+    "mean_best_auc": 0.7224622964859009,
+    "monosemanticity": 0.359375,
+    "n_top_matches": 11,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.23333333333333334,
-        "coverage_0.90": 0.23333333333333334,
-        "mean_best_auc": 0.6913896799087524
+        "n_features": 31,
+        "coverage_0.95": 0.22580645161290322,
+        "coverage_0.90": 0.22580645161290322,
+        "mean_best_auc": 0.6786094903945923
       },
       "bucketed": {
         "n_features": 7,
         "coverage_0.95": 0.14285714285714285,
-        "coverage_0.90": 0.42857142857142855,
-        "mean_best_auc": 0.8384922742843628
+        "coverage_0.90": 0.14285714285714285,
+        "mean_best_auc": 0.8322495818138123
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
-        "coverage_0.90": 0.375,
-        "mean_best_auc": 0.8165993094444275
+        "coverage_0.95": 0.375,
+        "coverage_0.90": 0.5,
+        "mean_best_auc": 0.9103508591651917
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.5692549347877502
+        "mean_best_auc": 0.5704329013824463
       }
     }
   },
@@ -83,36 +83,36 @@
     "variant": "jumprelu",
     "n_sae_features": 128,
     "n_active": 128,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.23529411764705882,
-    "coverage_0.90": 0.3137254901960784,
-    "mean_best_auc": 0.7218087315559387,
-    "monosemanticity": 0.9375,
-    "n_top_matches": 12,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.2692307692307692,
+    "coverage_0.90": 0.3269230769230769,
+    "mean_best_auc": 0.7306846976280212,
+    "monosemanticity": 0.9453125,
+    "n_top_matches": 14,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.26666666666666666,
-        "coverage_0.90": 0.3,
-        "mean_best_auc": 0.6939565539360046
+        "n_features": 31,
+        "coverage_0.95": 0.25806451612903225,
+        "coverage_0.90": 0.2903225806451613,
+        "mean_best_auc": 0.6856238842010498
       },
       "bucketed": {
         "n_features": 7,
         "coverage_0.95": 0.2857142857142857,
         "coverage_0.90": 0.42857142857142855,
-        "mean_best_auc": 0.8837913870811462
+        "mean_best_auc": 0.8761681914329529
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
-        "coverage_0.90": 0.5,
-        "mean_best_auc": 0.8126131892204285
+        "coverage_0.95": 0.5,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.9114797115325928
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.551016092300415
+        "mean_best_auc": 0.5527076125144958
       }
     }
   },
@@ -121,37 +121,37 @@
     "feed": "embedded",
     "variant": "topk",
     "n_sae_features": 128,
-    "n_active": 128,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.1568627450980392,
-    "coverage_0.90": 0.21568627450980393,
-    "mean_best_auc": 0.6887942552566528,
-    "monosemanticity": 0.2578125,
+    "n_active": 118,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.15384615384615385,
+    "coverage_0.90": 0.21153846153846154,
+    "mean_best_auc": 0.6926198601722717,
+    "monosemanticity": 0.288135593220339,
     "n_top_matches": 8,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.2,
-        "coverage_0.90": 0.23333333333333334,
-        "mean_best_auc": 0.6731746792793274
+        "n_features": 31,
+        "coverage_0.95": 0.16129032258064516,
+        "coverage_0.90": 0.1935483870967742,
+        "mean_best_auc": 0.659390926361084
       },
       "bucketed": {
         "n_features": 7,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.14285714285714285,
-        "mean_best_auc": 0.7503734230995178
+        "mean_best_auc": 0.7464949488639832
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
-        "coverage_0.90": 0.375,
-        "mean_best_auc": 0.7902100086212158
+        "coverage_0.95": 0.375,
+        "coverage_0.90": 0.5,
+        "mean_best_auc": 0.8768470883369446
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.5598289370536804
+        "mean_best_auc": 0.5558127760887146
       }
     }
   },
@@ -160,37 +160,37 @@
     "feed": "embedded",
     "variant": "l1",
     "n_sae_features": 128,
-    "n_active": 128,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.19607843137254902,
-    "coverage_0.90": 0.29411764705882354,
-    "mean_best_auc": 0.7182402610778809,
-    "monosemanticity": 0.375,
-    "n_top_matches": 10,
+    "n_active": 126,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.2692307692307692,
+    "coverage_0.90": 0.3076923076923077,
+    "mean_best_auc": 0.7392691969871521,
+    "monosemanticity": 0.3492063492063492,
+    "n_top_matches": 14,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.2,
-        "coverage_0.90": 0.26666666666666666,
-        "mean_best_auc": 0.6913030743598938
+        "n_features": 31,
+        "coverage_0.95": 0.25806451612903225,
+        "coverage_0.90": 0.25806451612903225,
+        "mean_best_auc": 0.6935193538665771
       },
       "bucketed": {
         "n_features": 7,
         "coverage_0.95": 0.2857142857142857,
         "coverage_0.90": 0.42857142857142855,
-        "mean_best_auc": 0.8431506752967834
+        "mean_best_auc": 0.8613906502723694
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
-        "coverage_0.90": 0.5,
-        "mean_best_auc": 0.8158499002456665
+        "coverage_0.95": 0.5,
+        "coverage_0.90": 0.625,
+        "mean_best_auc": 0.9325382709503174
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.5770508050918579
+        "mean_best_auc": 0.5754753947257996
       }
     }
   },
@@ -200,36 +200,36 @@
     "variant": "jumprelu",
     "n_sae_features": 128,
     "n_active": 128,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.21568627450980393,
-    "coverage_0.90": 0.27450980392156865,
-    "mean_best_auc": 0.7142516374588013,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.2692307692307692,
+    "coverage_0.90": 0.3076923076923077,
+    "mean_best_auc": 0.7268867492675781,
     "monosemanticity": 0.9140625,
-    "n_top_matches": 11,
+    "n_top_matches": 14,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.23333333333333334,
-        "coverage_0.90": 0.26666666666666666,
-        "mean_best_auc": 0.6930760741233826
+        "n_features": 31,
+        "coverage_0.95": 0.22580645161290322,
+        "coverage_0.90": 0.2903225806451613,
+        "mean_best_auc": 0.6812924146652222
       },
       "bucketed": {
         "n_features": 7,
-        "coverage_0.95": 0.2857142857142857,
+        "coverage_0.95": 0.42857142857142855,
         "coverage_0.90": 0.42857142857142855,
-        "mean_best_auc": 0.8498839139938354
+        "mean_best_auc": 0.8538824915885925
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
-        "coverage_0.90": 0.375,
-        "mean_best_auc": 0.7882707118988037
+        "coverage_0.95": 0.5,
+        "coverage_0.90": 0.5,
+        "mean_best_auc": 0.9157008528709412
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.5631996989250183
+        "mean_best_auc": 0.5625434517860413
       }
     }
   },
@@ -239,36 +239,36 @@
     "variant": "topk",
     "n_sae_features": 256,
     "n_active": 256,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.1568627450980392,
-    "coverage_0.90": 0.21568627450980393,
-    "mean_best_auc": 0.7130555510520935,
-    "monosemanticity": 0.1328125,
-    "n_top_matches": 8,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.17307692307692307,
+    "coverage_0.90": 0.3269230769230769,
+    "mean_best_auc": 0.7316672801971436,
+    "monosemanticity": 0.140625,
+    "n_top_matches": 9,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.16666666666666666,
-        "coverage_0.90": 0.2,
-        "mean_best_auc": 0.6890594363212585
+        "n_features": 31,
+        "coverage_0.95": 0.1935483870967742,
+        "coverage_0.90": 0.2903225806451613,
+        "mean_best_auc": 0.6886565089225769
       },
       "bucketed": {
         "n_features": 7,
-        "coverage_0.95": 0.14285714285714285,
-        "coverage_0.90": 0.14285714285714285,
-        "mean_best_auc": 0.7884278297424316
+        "coverage_0.95": 0.0,
+        "coverage_0.90": 0.2857142857142857,
+        "mean_best_auc": 0.8126827478408813
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
-        "coverage_0.90": 0.5,
-        "mean_best_auc": 0.8174793720245361
+        "coverage_0.95": 0.375,
+        "coverage_0.90": 0.75,
+        "mean_best_auc": 0.9236795902252197
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.6058698892593384
+        "mean_best_auc": 0.6033549904823303
       }
     }
   },
@@ -278,36 +278,36 @@
     "variant": "l1",
     "n_sae_features": 256,
     "n_active": 256,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.0784313725490196,
-    "coverage_0.90": 0.17647058823529413,
-    "mean_best_auc": 0.6695192456245422,
-    "monosemanticity": 0.03125,
-    "n_top_matches": 4,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.11538461538461539,
+    "coverage_0.90": 0.17307692307692307,
+    "mean_best_auc": 0.6798187494277954,
+    "monosemanticity": 0.04296875,
+    "n_top_matches": 6,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.06666666666666667,
-        "coverage_0.90": 0.13333333333333333,
-        "mean_best_auc": 0.6421104669570923
+        "n_features": 31,
+        "coverage_0.95": 0.0967741935483871,
+        "coverage_0.90": 0.12903225806451613,
+        "mean_best_auc": 0.6396377682685852
       },
       "bucketed": {
         "n_features": 7,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.14285714285714285,
-        "mean_best_auc": 0.724341869354248
+        "mean_best_auc": 0.7300606369972229
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.25,
+        "coverage_0.95": 0.375,
         "coverage_0.90": 0.5,
-        "mean_best_auc": 0.7865074872970581
+        "mean_best_auc": 0.861365020275116
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.5866189002990723
+        "mean_best_auc": 0.586743175983429
       }
     }
   },
@@ -317,36 +317,36 @@
     "variant": "jumprelu",
     "n_sae_features": 256,
     "n_active": 256,
-    "n_gt_features": 51,
-    "coverage_0.95": 0.3333333333333333,
-    "coverage_0.90": 0.35294117647058826,
-    "mean_best_auc": 0.7529138326644897,
-    "monosemanticity": 0.578125,
-    "n_top_matches": 17,
+    "n_gt_features": 52,
+    "coverage_0.95": 0.34615384615384615,
+    "coverage_0.90": 0.40384615384615385,
+    "mean_best_auc": 0.7712482213973999,
+    "monosemanticity": 0.59375,
+    "n_top_matches": 18,
     "per_tier": {
       "categorical": {
-        "n_features": 30,
-        "coverage_0.95": 0.3333333333333333,
-        "coverage_0.90": 0.3333333333333333,
-        "mean_best_auc": 0.7268240451812744
+        "n_features": 31,
+        "coverage_0.95": 0.3225806451612903,
+        "coverage_0.90": 0.3548387096774194,
+        "mean_best_auc": 0.7243385314941406
       },
       "bucketed": {
         "n_features": 7,
         "coverage_0.95": 0.42857142857142855,
         "coverage_0.90": 0.42857142857142855,
-        "mean_best_auc": 0.8986234068870544
+        "mean_best_auc": 0.9070906043052673
       },
       "conjunctive": {
         "n_features": 8,
-        "coverage_0.95": 0.5,
-        "coverage_0.90": 0.625,
-        "mean_best_auc": 0.8420391082763672
+        "coverage_0.95": 0.625,
+        "coverage_0.90": 0.875,
+        "mean_best_auc": 0.958741307258606
       },
       "regime": {
         "n_features": 6,
         "coverage_0.95": 0.0,
         "coverage_0.90": 0.0,
-        "mean_best_auc": 0.5945339798927307
+        "mean_best_auc": 0.6051414608955383
       }
     }
   }
