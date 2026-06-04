@@ -1306,6 +1306,27 @@ python scripts/train_all.py            # ~15min: trains 9 SAEs (3 variants x 3 f
 python scripts/evaluate.py             # ~30s: AUC alignment + per-tier table
 ```
 
+### GPU / CUDA
+
+`train_world_model.py` and `train_all.py` take `--device {auto,cpu,cuda}`
+(default `auto`, which uses CUDA when a GPU is visible; set the
+`ECONSAE_DEVICE` env var to override the default). Checkpoints are saved
+device-agnostically and `evaluate.py` loads them on CPU, so a GPU-trained
+run scores identically to a CPU one.
+
+```bash
+python scripts/train_world_model.py --device cuda
+python scripts/train_all.py --device cuda
+```
+
+For a recent NVIDIA GPU (Blackwell / sm_120 and similar), install a
+matching CUDA-enabled torch wheel — e.g. with `uv`:
+
+```bash
+uv venv && uv pip install -e ".[dev]"   # pulls a CUDA build on Linux
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
+
 Generate the HTML walkthrough (sibling to sm-sae's
 `runs/visualize.html`):
 

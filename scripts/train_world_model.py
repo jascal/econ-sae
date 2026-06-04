@@ -33,10 +33,13 @@ os.makedirs(RUNS_DIR, exist_ok=True)
 
 
 def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0,
-         h1_dim: int = 96, h2_dim: int = 48, epochs: int = 40):
+         h1_dim: int = 96, h2_dim: int = 48, epochs: int = 40,
+         device: str | None = None):
+    from scripts._device import resolve_device
+    device = resolve_device(device)
     print("=" * 78)
     print(f"Training world model: n_traj={n_trajectories}, n_periods={n_periods}, "
-          f"h1={h1_dim}, h2={h2_dim}, epochs={epochs}")
+          f"h1={h1_dim}, h2={h2_dim}, epochs={epochs}, device={device}")
     print("=" * 78)
     torch.manual_seed(seed)
 
@@ -45,9 +48,13 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0,
     print(f"  training pairs: X={tuple(data.X.shape)}  Y={tuple(data.Y.shape)}")
 
     model = WorldModel(h1_dim=h1_dim, h2_dim=h2_dim)
-    res = train_world_model(model, data, WMTrainConfig(epochs=epochs))
+    res = train_world_model(model, data, WMTrainConfig(epochs=epochs, device=device))
     final_loss = res["history"][-1]
     print(f"  final train MSE (z-scored): {final_loss:.4f}")
+
+    # Activation extraction below builds per-sample CPU inputs; move the
+    # trained model (and its normalization buffers) back to CPU to match.
+    model.to("cpu")
 
     # Save the model
     ckpt = os.path.join(RUNS_DIR, "world_model.pt")
@@ -75,4 +82,9 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0,
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser(description="Train the per-agent world model.")
+    ap.add_argument("--device", default=None, choices=["auto", "cpu", "cuda"],
+                    help="compute device; 'auto' (default) uses CUDA when available")
+    args = ap.parse_args()
+    main(device=args.device)
