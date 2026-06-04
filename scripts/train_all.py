@@ -95,9 +95,13 @@ def build_sae(variant: str, input_dim: int, feed_name: str):
 
 
 def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0,
-         calibrated: str | None = None, quick: bool = False):
+         calibrated: str | None = None, quick: bool = False,
+         device: str | None = None):
     from scripts._calibration_arm import resolve_arm
+    from scripts._device import resolve_device
     arm = resolve_arm(calibrated)
+    device = resolve_device(device)
+    print(f"  device: {device}")
     epoch_cap = 20 if quick else None
 
     print("=" * 78)
@@ -136,18 +140,20 @@ def main(n_trajectories: int = 32, n_periods: int = 60, seed: int = 0,
                 lr=1e-3, warmup_steps=50,
                 resample_every=max(100, epochs // 5),
                 log_every=max(50, epochs // 4),
+                device=device,
             )
             t0 = time.time()
             hist = train(sae, feed.X, tcfg, verbose=False)
             elapsed = time.time() - t0
 
             with torch.no_grad():
-                out = sae(feed.X)
+                X_eval = feed.X.to(device)
+                out = sae(X_eval)
                 final_recon = float(out.recon_loss)
                 final_l0 = float((out.z.abs() > 1e-9).float().sum(dim=-1).mean())
                 dead = float((sae.steps_dead >= tcfg.resample_threshold).float().mean())
-                var_total = float(feed.X.var())
-                var_resid = float((feed.X - out.x_hat).var())
+                var_total = float(X_eval.var())
+                var_resid = float((X_eval - out.x_hat).var())
                 ve = 1.0 - var_resid / max(var_total, 1e-12)
 
             run_id = f"{feed_name}__{variant}"
@@ -201,6 +207,8 @@ if __name__ == "__main__":
     ap.add_argument("--n-traj", type=int, default=32)
     ap.add_argument("--n-periods", type=int, default=60)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--device", default=None, choices=["auto", "cpu", "cuda"],
+                    help="compute device; 'auto' (default) uses CUDA when available")
     args = ap.parse_args()
     main(n_trajectories=args.n_traj, n_periods=args.n_periods, seed=args.seed,
-         calibrated=args.calibrated, quick=args.quick)
+         calibrated=args.calibrated, quick=args.quick, device=args.device)
