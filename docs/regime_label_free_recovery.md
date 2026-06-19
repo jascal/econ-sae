@@ -85,15 +85,44 @@ presence/granularity fix; supervision ≈ the allocation fix) — **two substrat
 mechanism** — and ties to the forge-tax / cosine-vs-capability findings (all =
 compression under-serving variance-cheap structure).
 
-## Honest limits & the open question
+## The decisive label-free test: a variance-equalized objective — and why it fails
+
+The verdict pointed at one route that could close the allocation gap label-free: an
+objective that doesn't price directions by variance. We tested it
+(`scripts/regime_whitened_loss_experiment.py`) — reconstruct in **whitened space**,
+loss = ‖M·(x − x̂)‖² with M = (Σ + λI)^(−α), so α=0 is the standard-L2 control and
+α=0.5 fully equalizes the principal directions. **Crucially this whitens the *loss*,
+not the *input*** — the encoder still sees the natural `x` (input-whitening, already
+tried, *hurt*); only the error metric is reweighted. Result (2 seeds):
+
+| α (whiten strength) | C3 cov95 (probe 67%) | Cref cov95 (probe 100%) |
+|--:|--|--|
+| 0.0 (L2 control) | 0% | 33% |
+| 0.25 | 0% | 25% |
+| 0.5 | 0% | 17% |
+| 0.75 | 0% | 0% |
+| 1.0 | 0% | 0% |
+
+**It does not close the gap — and beyond mild strength it strictly *hurts* (Cref
+33%→0% monotone).** This is the *principled* failure that sharpens the whole result:
+equalizing variance cannot separate a low-variance **signal** (regime) from
+low-variance **noise**, so the freed budget is spent chasing noise. The
+discrimination "this quiet direction is meaningful, that one is noise" is exactly
+what supervision injects — which is why no purely *variance*-based, label-free move
+can work. In one line: *you can't buy meaning back by re-pricing variance, because
+meaning and noise are equally cheap.*
+
+## Honest limits & the (refined) open question
 
 - Single substrate (econ); the **`bio motif` replication** is the generalization test
   that would promote this to a cross-substrate law.
 - Linear / probe-present features and L2-reconstruction SAEs specifically.
 - The supervised control is the single-head WM (3/6), not the published dual-head (6/6).
-- **Achievability of a label-free allocation fix is OPEN, not "impossible."** The one
-  untried route the verdict points to: an SAE objective with a *non-reconstruction*
-  term — e.g. a **variance-equalized (whitened-loss) reconstruction** `‖W(x − x̂)‖²`
-  so every direction costs equally (distinct from input-whitening, which was tried
-  and *hurt*). If that surfaces regime label-free → the reckoning is fully exculpated;
-  if not → supervision's allocation role is robust.
+- **No label-free move tested** — granularity, width 256→1024, TopK, input-whitening,
+  sparsity `l0` 1e-4→1e-2, *or* the variance-equalized loss — closes the allocation
+  gap; only supervision (representation shaping) does. The remaining open route is no
+  longer a *variance*-aware objective but a **structure-aware** one: a
+  non-reconstruction term that detects *predictable / mutually-informative* low-variance
+  directions without labels (e.g. a predictive-coding or coverage/diversity objective,
+  or polygram-style clustered encodings). Achievability is OPEN, not "impossible" — but
+  the search space is now precisely characterised.
