@@ -1551,7 +1551,22 @@ the full alignment matrix and per-tier metrics are written to
   `gdp_growth_vol` <- `sentiment_factor_vol`, ...); notably `monetary_prob`
   is the top driver of *no* moment, so an identifying moment for it (e.g.
   rate-change frequency) would have to be added rather than reweighted.
-- **Phase 10+**: LLM-augmented agents.
+- **Phase 11** (latest): the **held-out label-free recovery test** on the `regime`
+  tier — the experiment the manifesto's unsupervised-ceiling reckoning demanded.
+  Isolating a *label-free* granularity match on the same unsupervised world-model
+  `h1` (with a linear-probe ceiling per condition) resolves the regime gap into
+  **two distinct gaps**: a *presence* gap that **dissolves label-free** (granularity
+  lifts the probe ceiling 0.77→0.92, cov95 0→72%) and an *allocation* gap that
+  **does not close under any label-free SAE recipe** (width 256→1024, TopK,
+  whitening, `l0` 1e-4→1e-2 all leave cov95 ~0) — yet closes (0→50% at matched
+  granularity) the moment supervision *reshapes* `h1`. So supervision's role is
+  representation-shaping/allocation, **not** making the signal present:
+  *compression is variance-greedy, meaning is variance-cheap.* Scripts:
+  `scripts/regime_granularity_experiment.py`,
+  `scripts/regime_sae_allocation_experiment.py`,
+  `scripts/regime_allocation_followups.py` (summaries in `runs/regime_*`); full
+  writeup: [`docs/regime_label_free_recovery.md`](docs/regime_label_free_recovery.md)
+  (mirrored in the workspace `SUPERVISION_DEPENDENCE.md`).
 
 ## Acknowledgements
 
