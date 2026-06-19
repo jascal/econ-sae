@@ -1567,6 +1567,16 @@ the full alignment matrix and per-tier metrics are written to
   `scripts/regime_allocation_followups.py` (summaries in `runs/regime_*`); full
   writeup: [`docs/regime_label_free_recovery.md`](docs/regime_label_free_recovery.md)
   (mirrored in the workspace `SUPERVISION_DEPENDENCE.md`).
+- **Phase 12** (latest): a **predictive recoverability model** — the structural-match
+  law made quantitative. Each feature's PRESENCE is predicted by its Fisher SNR
+  (detection theory) and its ALLOCATION (SAE recovery) by its variance-share
+  (rate–distortion / reverse water-filling), *separately measurable without training an
+  SAE*. Validation (3 seeds): presence partial Spearman(Fisher→probe) **+0.97**;
+  presence-controlled Spearman(var_share→SAE) **+0.94** vs Fisher **+0.37**; the
+  `fiscal_active` exemplar (Fisher 169 / var_share 0.0006 / SAE 0.67). Formalised +
+  kernel-proved in i-orca `examples/recoverability` (`present_not_allocated`). Script:
+  `scripts/regime_recoverability_theory.py`; writeup
+  [`docs/recoverability_predictive_model.md`](docs/recoverability_predictive_model.md).
 
 ## Acknowledgements
 

@@ -1,0 +1,444 @@
+{
+  "config": {
+    "n_trajs": 48,
+    "n_periods": 80,
+    "seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "spearman_raw": {
+    "var_share_vs_sae": 0.8913351834720937,
+    "fisher_vs_sae": 0.964600678384212,
+    "fisher_vs_probe": 0.9923527597903176
+  },
+  "partial": {
+    "var_share_vs_sae_given_fisher": 0.39503919306502594,
+    "fisher_vs_sae_given_var_share": 0.8452346152243969,
+    "var_share_vs_probe_given_fisher": 0.2094891735091436,
+    "fisher_vs_probe_given_var_share": 0.9679304995198428
+  },
+  "regime_tier_internal_c3": {
+    "var_share_vs_sae": 0.942857142857143,
+    "fisher_vs_sae": 0.3714285714285715
+  },
+  "per_feature": [
+    {
+      "feature": "sector:household",
+      "tier": "categorical",
+      "var_share": 0.24526416733397025,
+      "fisher": 820.5472419443141,
+      "probe_auc": 1.0,
+      "sae_auc": 0.9971879124641418
+    },
+    {
+      "feature": "sector:firm",
+      "tier": "categorical",
+      "var_share": 0.2181700246632505,
+      "fisher": 1159.128923371252,
+      "probe_auc": 1.0,
+      "sae_auc": 0.9988225698471069
+    },
+    {
+      "feature": "sector:bank",
+      "tier": "categorical",
+      "var_share": 0.1634651345621012,
+      "fisher": 1176.6570111830617,
+      "probe_auc": 0.9999990456005369,
+      "sae_auc": 0.9999995827674866
+    },
+    {
+      "feature": "firm_sector:food",
+      "tier": "categorical",
+      "var_share": 0.16264101198116088,
+      "fisher": 1799.4651560296306,
+      "probe_auc": 0.9999999364299542,
+      "sae_auc": 0.9999079902966818
+    },
+    {
+      "feature": "firm_sector:services",
+      "tier": "categorical",
+      "var_share": 0.14737269306299342,
+      "fisher": 1859.2604408381824,
+      "probe_auc": 1.0,
+      "sae_auc": 0.9999669790267944
+    },
+    {
+      "feature": "debt_bucket:high",
+      "tier": "bucketed",
+      "var_share": 0.13097288417921854,
+      "fisher": 109.34652080331557,
+      "probe_auc": 0.9962305339813778,
+      "sae_auc": 0.9937371214230856
+    },
+    {
+      "feature": "firm_sector:durables",
+      "tier": "categorical",
+      "var_share": 0.11120865517855678,
+      "fisher": 1314.8124243582265,
+      "probe_auc": 1.0,
+      "sae_auc": 0.9998717705408732
+    },
+    {
+      "feature": "leverage:high",
+      "tier": "bucketed",
+      "var_share": 0.10100748695032424,
+      "fisher": 49.63285334502705,
+      "probe_auc": 0.9827620859623641,
+      "sae_auc": 0.9607520500818888
+    },
+    {
+      "feature": "productivity:high",
+      "tier": "bucketed",
+      "var_share": 0.10083079379174213,
+      "fisher": 10.929668933512408,
+      "probe_auc": 0.9539878331046139,
+      "sae_auc": 0.7953427036603292
+    },
+    {
+      "feature": "food_firm_low_inv",
+      "tier": "conjunctive",
+      "var_share": 0.09730430288815894,
+      "fisher": 151.21767894812078,
+      "probe_auc": 0.9991406956948371,
+      "sae_auc": 0.9982341329256693
+    },
+    {
+      "feature": "cohort:retiree",
+      "tier": "categorical",
+      "var_share": 0.08337577777519482,
+      "fisher": 215.72550111903192,
+      "probe_auc": 0.9999128628845725,
+      "sae_auc": 0.9951198299725851
+    },
+    {
+      "feature": "cash_bucket:poor",
+      "tier": "bucketed",
+      "var_share": 0.08183555863351873,
+      "fisher": 22.433041052739995,
+      "probe_auc": 0.9613829357563798,
+      "sae_auc": 0.8473562200864156
+    },
+    {
+      "feature": "inventory_bucket:stockout",
+      "tier": "bucketed",
+      "var_share": 0.07902894486635215,
+      "fisher": 66.28937354757419,
+      "probe_auc": 0.9963969750632747,
+      "sae_auc": 0.988993763923645
+    },
+    {
+      "feature": "cash_bucket:rich",
+      "tier": "bucketed",
+      "var_share": 0.07528107934950495,
+      "fisher": 11.135781632052291,
+      "probe_auc": 0.9558317673913637,
+      "sae_auc": 0.8699886798858643
+    },
+    {
+      "feature": "cohort:young",
+      "tier": "categorical",
+      "var_share": 0.0700659252081412,
+      "fisher": 118.37036570067619,
+      "probe_auc": 0.9992943680921046,
+      "sae_auc": 0.9636764725049337
+    },
+    {
+      "feature": "sector:government",
+      "tier": "categorical",
+      "var_share": 0.0644044024338481,
+      "fisher": 626.1399476761682,
+      "probe_auc": 0.9999154465697067,
+      "sae_auc": 0.9998709559440613
+    },
+    {
+      "feature": "cohort:prime",
+      "tier": "categorical",
+      "var_share": 0.05842249218170723,
+      "fisher": 134.14035852336147,
+      "probe_auc": 0.9998967860528923,
+      "sae_auc": 0.9589143594106039
+    },
+    {
+      "feature": "prime_AND_high_cash",
+      "tier": "conjunctive",
+      "var_share": 0.04835014370251508,
+      "fisher": 34.933352110468896,
+      "probe_auc": 0.9890274710269934,
+      "sae_auc": 0.9416005810101827
+    },
+    {
+      "feature": "services_firm_high_output",
+      "tier": "conjunctive",
+      "var_share": 0.04752963344118017,
+      "fisher": 127.99931515050478,
+      "probe_auc": 0.9976118296275599,
+      "sae_auc": 0.9973526000976562
+    },
+    {
+      "feature": "mpc_bucket:high",
+      "tier": "bucketed",
+      "var_share": 0.04176460849005339,
+      "fisher": 8.857871242037918,
+      "probe_auc": 0.941757483698809,
+      "sae_auc": 0.8776967326800028
+    },
+    {
+      "feature": "firm_AND_indebted_AND_high_inventory",
+      "tier": "conjunctive",
+      "var_share": 0.02172737970780329,
+      "fisher": 34.54055012405537,
+      "probe_auc": 0.9884153755467854,
+      "sae_auc": 0.938210666179657
+    },
+    {
+      "feature": "durables_firm_high_inv",
+      "tier": "conjunctive",
+      "var_share": 0.02121252204647231,
+      "fisher": 158.50392159265502,
+      "probe_auc": 0.9990328842948138,
+      "sae_auc": 0.996036152044932
+    },
+    {
+      "feature": "phase:high_leverage",
+      "tier": "regime",
+      "var_share": 0.007240110048921759,
+      "fisher": 4.602228417451474,
+      "probe_auc": 0.831532700913736,
+      "sae_auc": 0.6351896325747172
+    },
+    {
+      "feature": "retiree_AND_decumulating",
+      "tier": "conjunctive",
+      "var_share": 0.00698627706733716,
+      "fisher": 21.442960636230534,
+      "probe_auc": 0.9749189777685525,
+      "sae_auc": 0.9522925813992819
+    },
+    {
+      "feature": "txn_period_has:loan_origination",
+      "tier": "categorical",
+      "var_share": 0.005617392798638268,
+      "fisher": 5.193381453559708,
+      "probe_auc": 0.8564090200459624,
+      "sae_auc": 0.7128064632415771
+    },
+    {
+      "feature": "txn_period_has:dividend",
+      "tier": "categorical",
+      "var_share": 0.005128231610914402,
+      "fisher": 5.397146401315726,
+      "probe_auc": 0.8424294745462181,
+      "sae_auc": 0.6745293736457825
+    },
+    {
+      "feature": "txn_period_has:loan_repayment",
+      "tier": "categorical",
+      "var_share": 0.0036404146312700417,
+      "fisher": 76.98405848415274,
+      "probe_auc": 0.9792275807779333,
+      "sae_auc": 0.8008044759432474
+    },
+    {
+      "feature": "young_AND_high_mpc_AND_expansion",
+      "tier": "conjunctive",
+      "var_share": 0.0031768653893765124,
+      "fisher": 14.892881731357646,
+      "probe_auc": 0.9678761759179251,
+      "sae_auc": 0.9323239127794901
+    },
+    {
+      "feature": "txn_period_has:deposit_interest",
+      "tier": "categorical",
+      "var_share": 0.0027319635488878835,
+      "fisher": 4.270202180402861,
+      "probe_auc": 0.8182325003527883,
+      "sae_auc": 0.6322126189867655
+    },
+    {
+      "feature": "txn_period_has:interest",
+      "tier": "categorical",
+      "var_share": 0.0021869953575757947,
+      "fisher": 4.984543481140125,
+      "probe_auc": 0.834962602025119,
+      "sae_auc": 0.6218955318133036
+    },
+    {
+      "feature": "txn_period_has:transfer",
+      "tier": "categorical",
+      "var_share": 0.0018696539265238502,
+      "fisher": 108.54146673244911,
+      "probe_auc": 0.9990274811323071,
+      "sae_auc": 0.8356600403785706
+    },
+    {
+      "feature": "phase:high_rate",
+      "tier": "regime",
+      "var_share": 0.0017046007679431454,
+      "fisher": 4.763451916390068,
+      "probe_auc": 0.8333567140508132,
+      "sae_auc": 0.5879175464312235
+    },
+    {
+      "feature": "phase:contraction",
+      "tier": "regime",
+      "var_share": 0.0011358034910384362,
+      "fisher": 2.7111436512725917,
+      "probe_auc": 0.7825560136008741,
+      "sae_auc": 0.588033397992452
+    },
+    {
+      "feature": "young_AND_indebted",
+      "tier": "conjunctive",
+      "var_share": 0.0008897943628618111,
+      "fisher": 10.809445436539164,
+      "probe_auc": 0.9310069352977068,
+      "sae_auc": 0.8819867968559265
+    },
+    {
+      "feature": "phase:expansion",
+      "tier": "regime",
+      "var_share": 0.0006313955472275741,
+      "fisher": 2.303674066666145,
+      "probe_auc": 0.7501021573029264,
+      "sae_auc": 0.5708042581876119
+    },
+    {
+      "feature": "phase:fiscal_active",
+      "tier": "regime",
+      "var_share": 0.00014985252586124765,
+      "fisher": 7.623161435218506,
+      "probe_auc": 0.8396894579140336,
+      "sae_auc": 0.5946568648020426
+    },
+    {
+      "feature": "shock_period_has:fiscal",
+      "tier": "categorical",
+      "var_share": 0.00014985252586124765,
+      "fisher": 7.623161435218506,
+      "probe_auc": 0.8396894579140336,
+      "sae_auc": 0.5946568648020426
+    },
+    {
+      "feature": "shock_period_has:sentiment_young",
+      "tier": "categorical",
+      "var_share": 0.00011550280772840442,
+      "fisher": 0.11661773422079746,
+      "probe_auc": 0.5379862864798433,
+      "sae_auc": 0.521127462387085
+    },
+    {
+      "feature": "shock_period_has:sentiment_prime",
+      "tier": "categorical",
+      "var_share": 0.00011356448247468451,
+      "fisher": 0.09182669054114016,
+      "probe_auc": 0.534863398035867,
+      "sae_auc": 0.5186019539833069
+    },
+    {
+      "feature": "shock_period_has:tfp_food",
+      "tier": "categorical",
+      "var_share": 9.255858508462648e-05,
+      "fisher": 0.05745679953798202,
+      "probe_auc": 0.5275976087010459,
+      "sae_auc": 0.5155773560206095
+    },
+    {
+      "feature": "shock_period_has:tfp_services",
+      "tier": "categorical",
+      "var_share": 6.6147644636205e-05,
+      "fisher": 0.06129439441851937,
+      "probe_auc": 0.5222972584410771,
+      "sae_auc": 0.5158386826515198
+    },
+    {
+      "feature": "shock_period_has:productivity_aggregate",
+      "tier": "categorical",
+      "var_share": 6.300807749861763e-05,
+      "fisher": 4.187062646524936,
+      "probe_auc": 0.7783521616636646,
+      "sae_auc": 0.5979243516921997
+    },
+    {
+      "feature": "shock_period_has:tfp_durables",
+      "tier": "categorical",
+      "var_share": 6.216588248803736e-05,
+      "fisher": 0.08783293989707965,
+      "probe_auc": 0.5191823137053985,
+      "sae_auc": 0.5152223507563273
+    },
+    {
+      "feature": "phase:monetary_active",
+      "tier": "regime",
+      "var_share": 4.856666096153195e-05,
+      "fisher": 0.47787257859948845,
+      "probe_auc": 0.5788468549892738,
+      "sae_auc": 0.5333386659622192
+    },
+    {
+      "feature": "shock_period_has:monetary",
+      "tier": "categorical",
+      "var_share": 4.856666096153195e-05,
+      "fisher": 0.47787257859948845,
+      "probe_auc": 0.5788468549892738,
+      "sae_auc": 0.5333386659622192
+    },
+    {
+      "feature": "shock_period_has:sentiment_retiree",
+      "tier": "categorical",
+      "var_share": 3.969058218180591e-05,
+      "fisher": 0.08884706626037464,
+      "probe_auc": 0.5317991252001364,
+      "sae_auc": 0.5129214922587076
+    },
+    {
+      "feature": "txn_period_has:b2b_purchase",
+      "tier": "categorical",
+      "var_share": NaN,
+      "fisher": NaN,
+      "probe_auc": NaN,
+      "sae_auc": 0.5
+    },
+    {
+      "feature": "txn_period_has:purchase_durables",
+      "tier": "categorical",
+      "var_share": NaN,
+      "fisher": NaN,
+      "probe_auc": NaN,
+      "sae_auc": 0.5
+    },
+    {
+      "feature": "txn_period_has:purchase_food",
+      "tier": "categorical",
+      "var_share": NaN,
+      "fisher": NaN,
+      "probe_auc": NaN,
+      "sae_auc": 0.5
+    },
+    {
+      "feature": "txn_period_has:purchase_services",
+      "tier": "categorical",
+      "var_share": NaN,
+      "fisher": NaN,
+      "probe_auc": NaN,
+      "sae_auc": 0.5
+    },
+    {
+      "feature": "txn_period_has:tax",
+      "tier": "categorical",
+      "var_share": NaN,
+      "fisher": NaN,
+      "probe_auc": NaN,
+      "sae_auc": 0.5
+    },
+    {
+      "feature": "txn_period_has:wage",
+      "tier": "categorical",
+      "var_share": NaN,
+      "fisher": NaN,
+      "probe_auc": NaN,
+      "sae_auc": 0.5
+    }
+  ]
+}
