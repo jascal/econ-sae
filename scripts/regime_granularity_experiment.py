@@ -57,6 +57,14 @@ from macro_feed_v3_experiment import PER_PERIOD_PREFIXES, build_macro_feed_v3
 REGIME = "regime"
 WINDOW = 5  # matches the regime labels' 5-period trailing GDP window
 
+# --- baseline unsupervised SAE config (the knobs the sweep scripts vary) ---
+SAE_WIDTH = 256        # latent count
+SAE_L0 = 1e-3          # JumpReLU L0 sparsity coefficient
+SAE_INIT_THETA = 0.05  # JumpReLU threshold init
+SAE_EPOCHS = 200       # SAE training epochs
+SAE_BATCH = 256        # SAE batch size
+PROBE_LAM = 1.0        # ridge-LDA regularisation for the linear-probe ceiling
+
 
 def auc(scores: np.ndarray, y: np.ndarray) -> float:
     """ROC-AUC via the Mann-Whitney U statistic (rank-based)."""
@@ -148,16 +156,18 @@ def regime_recovery(X: np.ndarray, Y: np.ndarray, vocab: list[str], seed: int):
     plus the ridge-LDA probe ceiling per regime feature."""
     torch.manual_seed(seed)
     Xt = torch.tensor(zscore(X), dtype=torch.float32)
-    sae = make_sae("jumprelu", Xt.shape[1], 256, l0_coeff=1e-3, init_theta=0.05)
-    train(sae, Xt, TrainConfig(epochs=200, batch_size=256, lr=1e-3, log_every=10**9),
-          verbose=False)
+    sae = make_sae("jumprelu", Xt.shape[1], SAE_WIDTH,
+                   l0_coeff=SAE_L0, init_theta=SAE_INIT_THETA)
+    train(sae, Xt, TrainConfig(epochs=SAE_EPOCHS, batch_size=SAE_BATCH, lr=1e-3,
+                               log_every=10**9), verbose=False)
     Z = score_sae(sae, Xt)
     rep = align(Z, Y, vocab)
     pt = rep.per_tier[REGIME]
     reg_idx = [j for j, f in enumerate(vocab) if feature_tier(f) == REGIME]
     sae_pf = {vocab[j]: float(rep.alignment[:, j].max()) for j in reg_idx}
     Xz = zscore(X)
-    probe_pf = {vocab[j]: ridge_lda_probe_auc(Xz, Y[:, j], seed=seed) for j in reg_idx}
+    probe_pf = {vocab[j]: ridge_lda_probe_auc(Xz, Y[:, j], lam=PROBE_LAM, seed=seed)
+                for j in reg_idx}
     return {
         "dim": int(X.shape[1]),
         "sae_regime_mauc": float(pt["mean_best_auc"]),

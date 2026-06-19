@@ -1565,7 +1565,8 @@ the full alignment matrix and per-tier metrics are written to
   `scripts/regime_granularity_experiment.py`,
   `scripts/regime_sae_allocation_experiment.py`,
   `scripts/regime_allocation_followups.py` (summaries in `runs/regime_*`); full
-  writeup in the workspace `SUPERVISION_DEPENDENCE.md`.
+  writeup: [`docs/regime_label_free_recovery.md`](docs/regime_label_free_recovery.md)
+  (mirrored in the workspace `SUPERVISION_DEPENDENCE.md`).
 
 ## Acknowledgements
 
