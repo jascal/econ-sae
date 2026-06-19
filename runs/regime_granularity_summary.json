@@ -1,0 +1,481 @@
+{
+  "config": {
+    "n_trajs": 48,
+    "n_periods": 80,
+    "wm_epochs": 40,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "window": 5
+  },
+  "aggregate": {
+    "C0_raw": {
+      "sae_mauc": [
+        0.5849900643030802,
+        0.016083901249997624
+      ],
+      "sae_cov95": [
+        0.0,
+        0.0
+      ],
+      "probe_mauc": [
+        0.7693473164619427,
+        0.011022657283743846
+      ],
+      "probe_cov95": [
+        0.0,
+        0.0
+      ],
+      "dim": 192
+    },
+    "C1_agentpool": {
+      "sae_mauc": [
+        0.723161776860555,
+        0.00022039749651705105
+      ],
+      "sae_cov95": [
+        0.0,
+        0.0
+      ],
+      "probe_mauc": [
+        0.893198038365227,
+        0.0018786978216328134
+      ],
+      "probe_cov95": [
+        0.5,
+        0.0
+      ],
+      "dim": 192
+    },
+    "C2_timemean": {
+      "sae_mauc": [
+        0.6682172616322836,
+        0.014823447960607949
+      ],
+      "sae_cov95": [
+        0.0,
+        0.0
+      ],
+      "probe_mauc": [
+        0.7941467980725805,
+        0.007251413333787208
+      ],
+      "probe_cov95": [
+        0.3333333333333333,
+        0.0
+      ],
+      "dim": 192
+    },
+    "C3_timecat": {
+      "sae_mauc": [
+        0.7161399722099304,
+        0.015976363659032388
+      ],
+      "sae_cov95": [
+        0.0,
+        0.0
+      ],
+      "probe_mauc": [
+        0.9182033767802752,
+        0.0034240841120975222
+      ],
+      "probe_cov95": [
+        0.7222222222222222,
+        0.07856742013183865
+      ],
+      "dim": 960
+    },
+    "Cref_macro": {
+      "sae_mauc": [
+        0.8379112680753072,
+        0.0052964341855631725
+      ],
+      "sae_cov95": [
+        0.16666666666666666,
+        0.0
+      ],
+      "probe_mauc": [
+        0.9865275925082683,
+        0.0005306678221808182
+      ],
+      "probe_cov95": [
+        1.0,
+        0.0
+      ],
+      "dim": 223
+    }
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "n_trajs": 48,
+      "n_periods": 80,
+      "window": 5,
+      "conditions": {
+        "C0_raw": {
+          "dim": 192,
+          "sae_regime_mauc": 0.5687804818153381,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.5561057329177856,
+            "phase:expansion": 0.5664504766464233,
+            "phase:fiscal_active": 0.5474675893783569,
+            "phase:high_leverage": 0.6070980429649353,
+            "phase:high_rate": 0.5995361804962158,
+            "phase:monetary_active": 0.5360251665115356
+          },
+          "probe_regime_mean": 0.7570019266930067,
+          "probe_regime_cov95": 0.0,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.7355463942736647,
+            "phase:expansion": 0.7049505014653642,
+            "phase:fiscal_active": 0.7800611367177277,
+            "phase:high_leverage": 0.8403723670892277,
+            "phase:high_rate": 0.8772618867272329,
+            "phase:monetary_active": 0.6038192738848229
+          }
+        },
+        "C1_agentpool": {
+          "dim": 192,
+          "sae_regime_mauc": 0.7228876948356628,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.6948533654212952,
+            "phase:expansion": 0.6874947547912598,
+            "phase:fiscal_active": 0.7298377752304077,
+            "phase:high_leverage": 0.8187665343284607,
+            "phase:high_rate": 0.8134793639183044,
+            "phase:monetary_active": 0.5928940176963806
+          },
+          "probe_regime_mean": 0.893392278440429,
+          "probe_regime_cov95": 0.5,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9161699519004055,
+            "phase:expansion": 0.8934630003766736,
+            "phase:fiscal_active": 0.9897867104183757,
+            "phase:high_leverage": 0.9561534256621634,
+            "phase:high_rate": 0.9874799297304445,
+            "phase:monetary_active": 0.6173006525545122
+          }
+        },
+        "C2_timemean": {
+          "dim": 192,
+          "sae_regime_mauc": 0.6612838506698608,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.6556879281997681,
+            "phase:expansion": 0.6817123889923096,
+            "phase:fiscal_active": 0.5300523638725281,
+            "phase:high_leverage": 0.7637670040130615,
+            "phase:high_rate": 0.8098722100257874,
+            "phase:monetary_active": 0.526611328125
+          },
+          "probe_regime_mean": 0.7841364407801376,
+          "probe_regime_cov95": 0.3333333333333333,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.8573469772705838,
+            "phase:expansion": 0.8081361503955073,
+            "phase:fiscal_active": 0.5820139458572601,
+            "phase:high_leverage": 0.9648894668400521,
+            "phase:high_rate": 0.9790626947996751,
+            "phase:monetary_active": 0.5133694095177463
+          }
+        },
+        "C3_timecat": {
+          "dim": 960,
+          "sae_regime_mauc": 0.7005698084831238,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7172809839248657,
+            "phase:expansion": 0.7070589065551758,
+            "phase:fiscal_active": 0.624028205871582,
+            "phase:high_leverage": 0.8281834721565247,
+            "phase:high_rate": 0.7624987959861755,
+            "phase:monetary_active": 0.564368724822998
+          },
+          "probe_regime_mean": 0.9164604247517055,
+          "probe_regime_cov95": 0.6666666666666666,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9642931245873809,
+            "phase:expansion": 0.9499571961784748,
+            "phase:fiscal_active": 0.9985951599671862,
+            "phase:high_leverage": 0.9784501930213528,
+            "phase:high_rate": 0.9862747690738397,
+            "phase:monetary_active": 0.621192105681999
+          }
+        },
+        "Cref_macro": {
+          "dim": 223,
+          "sae_regime_mauc": 0.8453826904296875,
+          "sae_regime_cov95": 0.16666666666666666,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7107049226760864,
+            "phase:expansion": 0.7627884745597839,
+            "phase:fiscal_active": 0.9970548748970032,
+            "phase:high_leverage": 0.8507979512214661,
+            "phase:high_rate": 0.8530920743942261,
+            "phase:monetary_active": 0.8978580236434937
+          },
+          "probe_regime_mean": 0.9869493802321103,
+          "probe_regime_cov95": 1.0,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9766622653965858,
+            "phase:expansion": 0.9813580796493511,
+            "phase:fiscal_active": 1.0,
+            "phase:high_leverage": 0.9649302101335362,
+            "phase:high_rate": 0.9987457262131888,
+            "phase:monetary_active": 1.0
+          }
+        }
+      }
+    },
+    {
+      "seed": 1,
+      "n_trajs": 48,
+      "n_periods": 80,
+      "window": 5,
+      "conditions": {
+        "C0_raw": {
+          "dim": 192,
+          "sae_regime_mauc": 0.5792754888534546,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.5765056610107422,
+            "phase:expansion": 0.579524576663971,
+            "phase:fiscal_active": 0.5703899264335632,
+            "phase:high_leverage": 0.6308796405792236,
+            "phase:high_rate": 0.5870693922042847,
+            "phase:monetary_active": 0.5312835574150085
+          },
+          "probe_regime_mean": 0.7672773191901978,
+          "probe_regime_cov95": 0.0,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.8182594135021388,
+            "phase:expansion": 0.7662366977147893,
+            "phase:fiscal_active": 0.8203445964803096,
+            "phase:high_leverage": 0.8256497762842191,
+            "phase:high_rate": 0.809167369400887,
+            "phase:monetary_active": 0.5640060617588437
+          }
+        },
+        "C1_agentpool": {
+          "dim": 192,
+          "sae_regime_mauc": 0.7234273552894592,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7852222323417664,
+            "phase:expansion": 0.7105808854103088,
+            "phase:fiscal_active": 0.676140308380127,
+            "phase:high_leverage": 0.8168574571609497,
+            "phase:high_rate": 0.7879685759544373,
+            "phase:monetary_active": 0.5637944340705872
+          },
+          "probe_regime_mean": 0.8953956865844227,
+          "probe_regime_cov95": 0.5,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9109050622437158,
+            "phase:expansion": 0.9232238774722434,
+            "phase:fiscal_active": 0.9951140684410646,
+            "phase:high_leverage": 0.9800064005120409,
+            "phase:high_rate": 0.964683173369771,
+            "phase:monetary_active": 0.5984415374677002
+          }
+        },
+        "C2_timemean": {
+          "dim": 192,
+          "sae_regime_mauc": 0.6888172030448914,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7157967686653137,
+            "phase:expansion": 0.6779773831367493,
+            "phase:fiscal_active": 0.5223015546798706,
+            "phase:high_leverage": 0.852820634841919,
+            "phase:high_rate": 0.8263130784034729,
+            "phase:monetary_active": 0.5376936793327332
+          },
+          "probe_regime_mean": 0.797223492037928,
+          "probe_regime_cov95": 0.3333333333333333,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.8503024842322049,
+            "phase:expansion": 0.8342263832459911,
+            "phase:fiscal_active": 0.6245437262357414,
+            "phase:high_leverage": 0.9839227138171054,
+            "phase:high_rate": 0.9653375697611247,
+            "phase:monetary_active": 0.5250080749354005
+          }
+        },
+        "C3_timecat": {
+          "dim": 960,
+          "sae_regime_mauc": 0.7097460627555847,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7570173740386963,
+            "phase:expansion": 0.7214332818984985,
+            "phase:fiscal_active": 0.6520498991012573,
+            "phase:high_leverage": 0.8244020938873291,
+            "phase:high_rate": 0.7547377943992615,
+            "phase:monetary_active": 0.548835813999176
+          },
+          "probe_regime_mean": 0.9151622939541517,
+          "probe_regime_cov95": 0.8333333333333334,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9525035397091003,
+            "phase:expansion": 0.9576373759380296,
+            "phase:fiscal_active": 0.9998479087452471,
+            "phase:high_leverage": 0.9943955516441315,
+            "phase:high_rate": 0.9869285349752235,
+            "phase:monetary_active": 0.5996608527131783
+          }
+        },
+        "Cref_macro": {
+          "dim": 223,
+          "sae_regime_mauc": 0.8337154388427734,
+          "sae_regime_cov95": 0.16666666666666666,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7539325952529907,
+            "phase:expansion": 0.8012553453445435,
+            "phase:fiscal_active": 0.9791999459266663,
+            "phase:high_leverage": 0.8201035261154175,
+            "phase:high_rate": 0.759231686592102,
+            "phase:monetary_active": 0.8885700106620789
+          },
+          "probe_regime_mean": 0.9868542708212776,
+          "probe_regime_cov95": 1.0,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9595461817111965,
+            "phase:expansion": 0.9825577211198127,
+            "phase:fiscal_active": 1.0,
+            "phase:high_leverage": 0.9838947115769262,
+            "phase:high_rate": 0.9951270105197306,
+            "phase:monetary_active": 1.0
+          }
+        }
+      }
+    },
+    {
+      "seed": 2,
+      "n_trajs": 48,
+      "n_periods": 80,
+      "window": 5,
+      "conditions": {
+        "C0_raw": {
+          "dim": 192,
+          "sae_regime_mauc": 0.606914222240448,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.6314888000488281,
+            "phase:expansion": 0.5664377212524414,
+            "phase:fiscal_active": 0.6661130785942078,
+            "phase:high_leverage": 0.6675912141799927,
+            "phase:high_rate": 0.5771470665931702,
+            "phase:monetary_active": 0.5327072739601135
+          },
+          "probe_regime_mean": 0.7837627035026237,
+          "probe_regime_cov95": 0.0,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.7938622330268184,
+            "phase:expansion": 0.7791192727286258,
+            "phase:fiscal_active": 0.9186626405440635,
+            "phase:high_leverage": 0.8285759593677612,
+            "phase:high_rate": 0.8136408860243195,
+            "phase:monetary_active": 0.5687152293241546
+          }
+        },
+        "C1_agentpool": {
+          "dim": 192,
+          "sae_regime_mauc": 0.723170280456543,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.6582639217376709,
+            "phase:expansion": 0.7329267859458923,
+            "phase:fiscal_active": 0.811987578868866,
+            "phase:high_leverage": 0.8396387100219727,
+            "phase:high_rate": 0.7325421571731567,
+            "phase:monetary_active": 0.563662588596344
+          },
+          "probe_regime_mean": 0.8908061500708296,
+          "probe_regime_cov95": 0.5,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.90906331289375,
+            "phase:expansion": 0.8690522677079666,
+            "phase:fiscal_active": 0.9987844451256249,
+            "phase:high_leverage": 0.9797768986629841,
+            "phase:high_rate": 0.9792457423837861,
+            "phase:monetary_active": 0.6089142336508659
+          }
+        },
+        "C2_timemean": {
+          "dim": 192,
+          "sae_regime_mauc": 0.6545507311820984,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.643101155757904,
+            "phase:expansion": 0.6849840879440308,
+            "phase:fiscal_active": 0.5339723825454712,
+            "phase:high_leverage": 0.8393335938453674,
+            "phase:high_rate": 0.6906677484512329,
+            "phase:monetary_active": 0.535245418548584
+          },
+          "probe_regime_mean": 0.801080461399676,
+          "probe_regime_cov95": 0.3333333333333333,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.8401322579590617,
+            "phase:expansion": 0.7769100278462375,
+            "phase:fiscal_active": 0.7270709355544516,
+            "phase:high_leverage": 0.9856330491785122,
+            "phase:high_rate": 0.9698584320158371,
+            "phase:monetary_active": 0.5068780658439561
+          }
+        },
+        "C3_timecat": {
+          "dim": 960,
+          "sae_regime_mauc": 0.7381040453910828,
+          "sae_regime_cov95": 0.0,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7696900963783264,
+            "phase:expansion": 0.7371851801872253,
+            "phase:fiscal_active": 0.7372567057609558,
+            "phase:high_leverage": 0.8383715748786926,
+            "phase:high_rate": 0.8005631566047668,
+            "phase:monetary_active": 0.5455572605133057
+          },
+          "probe_regime_mean": 0.9229874116349682,
+          "probe_regime_cov95": 0.6666666666666666,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9633255030892881,
+            "phase:expansion": 0.9456774317447109,
+            "phase:fiscal_active": 0.9998625894489837,
+            "phase:high_leverage": 0.9920879668566801,
+            "phase:high_rate": 0.9855518437364049,
+            "phase:monetary_active": 0.6514191349337412
+          }
+        },
+        "Cref_macro": {
+          "dim": 223,
+          "sae_regime_mauc": 0.8346356749534607,
+          "sae_regime_cov95": 0.16666666666666666,
+          "sae_regime_per_feature": {
+            "phase:contraction": 0.7172536849975586,
+            "phase:expansion": 0.7867913246154785,
+            "phase:fiscal_active": 0.9957881569862366,
+            "phase:high_leverage": 0.7853657603263855,
+            "phase:high_rate": 0.8261885046958923,
+            "phase:monetary_active": 0.896426796913147
+          },
+          "probe_regime_mean": 0.985779126471417,
+          "probe_regime_cov95": 1.0,
+          "probe_regime_per_feature": {
+            "phase:contraction": 0.9680143092650624,
+            "phase:expansion": 0.9681976762794866,
+            "phase:fiscal_active": 1.0,
+            "phase:high_leverage": 0.9816597271975274,
+            "phase:high_rate": 0.9968030460864256,
+            "phase:monetary_active": 1.0
+          }
+        }
+      }
+    }
+  ]
+}
